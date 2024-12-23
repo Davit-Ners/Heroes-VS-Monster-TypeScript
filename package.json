@@ -1,0 +1,15 @@
+{
+  "name": "heroes-vs-monsters",
+  "version": "1.0.0",
+  "description": "TypeScript implementation of the game 'Heroes VS Monsters'",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "watch": "npx tsc --watch"
+  },
+  "author": "Davit Nersesyan",
+  "license": "ISC",
+  "dependencies": {
+    "typescript": "^5.7.2"
+  }
+}
