@@ -153,6 +153,10 @@ const loup = new Loup();
 const divMap = document.querySelector('.map');
 // Const et Let
 let positionJoueur = [27, 6];
+const kratos = document.createElement('img');
+kratos.src = '../img/kratos.png';
+const wolf = document.createElement('img');
+wolf.src = '../img/wolf.png';
 // Fonctions du jeu
 const map = [
     ['#', '#', '#', '#', '#', '#', '-', '-', '-', '-', '-', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '-', '-', '-', '-', '#', '#', '#'],
@@ -213,4 +217,37 @@ function generateMap() {
         j = 0;
     }
 }
+function placerJoueur() {
+    document.getElementById(`${positionJoueur[0]}-${positionJoueur[1]}`).append(kratos);
+}
+function whichKey(event) {
+    event.preventDefault();
+    if (event.key === "ArrowUp") {
+        deplacer(-1, 0);
+    }
+    else if (event.key === "ArrowDown") {
+        deplacer(1, 0);
+    }
+    else if (event.key === "ArrowLeft") {
+        deplacer(0, -1);
+    }
+    else if (event.key === "ArrowRight") {
+        deplacer(0, 1);
+    }
+}
+function notOutOfMap(x, y) {
+    return positionJoueur[0] + x >= 0 &&
+        positionJoueur[0] + x <= 27 &&
+        positionJoueur[1] + y >= 0 &&
+        positionJoueur[1] + y <= 27;
+}
+function deplacer(x, y) {
+    if (notOutOfMap(x, y) && map[positionJoueur[0] + x][positionJoueur[1] + y] != '#') {
+        positionJoueur[0] += x;
+        positionJoueur[1] += y;
+        placerJoueur();
+    }
+}
 generateMap();
+placerJoueur();
+window.addEventListener('keydown', whichKey);
