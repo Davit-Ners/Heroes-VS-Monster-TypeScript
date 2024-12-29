@@ -1,0 +1,70 @@
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  body {
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  img, picture, video, canvas, svg {
+    display: block;
+    max-width: 100%;
+  }
+  
+  input, button, textarea, select {
+    font: inherit;
+  }
+
+header {
+    margin-bottom: 5em;
+    height: 10em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgb(74, 14, 14);
+    color: white;
+}
+
+.map {
+    width: 560px;
+    height: 560px;
+    background-color: rgb(34, 33, 33);
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.row {
+    display: flex;
+    justify-content: space-around;
+}
+
+.block {
+    width: 20px;
+    height: 20px;
+}
+
+.arbre {
+    background-color: darkgreen;
+}
+
+.feuillage {
+    background-color: rgb(6, 173, 48);
+}
+
+.route {
+    background-color: gray;
+}
+
+.sol {
+    background-color: rgb(159, 157, 155);
+}
+
+main {
+    margin-bottom: 5em;
+}
