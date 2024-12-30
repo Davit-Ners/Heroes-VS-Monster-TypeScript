@@ -1,5 +1,9 @@
 // Création des personnages du jeu
 
+let compteurCoffres: number = 0;
+const tabCoffres: Chest[] = [];
+
+
 class De {
 
     private _nbFaces: number;
@@ -19,13 +23,66 @@ class De {
 
 }
 
+class Chest {
+
+    private _contains: number;
+    private _opened: boolean;
+    private _position: number[];
+    private _img: HTMLImageElement;
+    private _id: number;
+
+    constructor(position: number[]) {
+        this._contains = Math.ceil(Math.random()*15);
+        this._opened = false;
+        this._position = position;
+
+        this._img = document.createElement('img');
+        this._img.src = '../img/coffre.png';
+        this._img.className = 'chest';
+
+        this._id = compteurCoffres;
+        compteurCoffres++;
+
+        this._img.id = `c${this._id}`;
+
+        tabCoffres.push(this);
+    }
+
+    public get contains(): number {
+        return this._contains;
+    }
+
+    public get opened(): boolean {
+        return this._opened;
+    }
+
+    public get position(): number[] {
+        return this._position;
+    }
+
+    public get img(): HTMLImageElement {
+        return this._img;
+    }
+
+    public get id(): number {
+        return this._id;
+    }
+
+    public open(): void {
+        this._contains = 0;
+        this._opened = true;
+    }
+
+}
+
 class Personnage {
 
     protected _end: number;
     protected _force: number;
     protected _pv: number;
+    protected _img: HTMLImageElement;
 
-    constructor() {
+    constructor(src: string) {
 
         this._end = this.calculerStates();
 
@@ -33,6 +90,9 @@ class Personnage {
 
         const modifier: number = this.calculateModifier(this._end);
         this._pv = this._end + modifier;
+
+        this._img = document.createElement('img');
+        this._img.src = src;
 
     }
 
@@ -48,6 +108,10 @@ class Personnage {
 
     public get pv(): number {
         return this._pv;
+    }
+
+    public get img(): HTMLImageElement {
+        return this._img;
     }
 
     public get maxPv(): number {
@@ -105,8 +169,8 @@ class Hero extends Personnage {
     private _or: number;
     private _cuir: number;
 
-    constructor() {
-        super();
+    constructor(src: string) {
+        super(src);
         this._or = 0;
         this._cuir = 0;
     }
@@ -128,6 +192,17 @@ class Hero extends Personnage {
         this.pv = this.maxPv;
     }
 
+    public openChest(chest: Chest) {
+        if (Math.floor(Math.random()) == 0) {
+            this._cuir += chest.contains;
+            chest.open();
+        }
+        else {
+            this._or += chest.contains;
+            chest.open();
+        }
+    }
+    
 }
 
 class Human extends Hero {
@@ -151,8 +226,8 @@ class Monstre extends Personnage {
     protected _or: number;
     protected _cuir: number;
 
-    constructor() {
-        super();
+    constructor(src: string) {
+        super(src);
         this._or = 0;
         this._cuir = 0;
     }
@@ -169,8 +244,8 @@ class Monstre extends Personnage {
 
 class Loup extends Monstre {
 
-    constructor() {
-        super();
+    constructor(src: string) {
+        super(src);
         this._cuir = 1;
     }
 
@@ -178,8 +253,8 @@ class Loup extends Monstre {
 
 class Orc extends Monstre {
 
-    constructor() {
-        super();
+    constructor(src: string) {
+        super(src);
         this._or = 1;
     }
 
@@ -191,8 +266,8 @@ class Orc extends Monstre {
 
 class Dragonnet extends Monstre {
 
-    constructor() {
-        super();
+    constructor(src: string) {
+        super(src);
         this._or = 1;
         this._cuir = 1;
     }
@@ -203,19 +278,16 @@ class Dragonnet extends Monstre {
 
 }
 
-const hu = new Human();
-const loup = new Loup();
-
 // Recuperation elements DOM
 const divMap: HTMLDivElement = document.querySelector('.map') as HTMLDivElement;
 
 // Const et Let
 let positionJoueur = [27, 6];
-const kratos: HTMLImageElement = document.createElement('img');
-kratos.src = '../img/kratos.png';
+const kratos: Human = new Human('../img/kratos.png');
 
-const wolf: HTMLImageElement = document.createElement('img');
-wolf.src = '../img/wolf.png';
+const coffre1: Chest = new Chest([27, 9]);
+
+const wolf: Loup = new Loup('../img/wolf.png');
 
 // Fonctions du jeu
 
@@ -280,10 +352,14 @@ function generateMap(): void {
         i++
         j = 0;
     }
+
+    for (const coffre of tabCoffres) {
+        document.getElementById(`${coffre.position[0]}-${coffre.position[1]}`)!.append(coffre.img);
+    }
 }
 
 function placerJoueur(): void {
-    document.getElementById(`${positionJoueur[0]}-${positionJoueur[1]}`)!.append(kratos);
+    document.getElementById(`${positionJoueur[0]}-${positionJoueur[1]}`)!.append(kratos.img);
 }
 
 function whichKey(event: KeyboardEvent): void {
@@ -307,7 +383,7 @@ function notOutOfMap(x: number, y: number): boolean {
 }
 
 function deplacer(x: number, y: number): void {
-    if (notOutOfMap(x, y) && map[positionJoueur[0] + x][positionJoueur[1] + y] != '#') {
+    if (notOutOfMap(x, y) && map[positionJoueur[0] + x][positionJoueur[1] + y] != '#' && document.getElementById(`${positionJoueur[0] + x}-${positionJoueur[1] + y}`)?.childNodes.length == 0) {
         positionJoueur[0] += x;
         positionJoueur[1] += y;
         placerJoueur();
