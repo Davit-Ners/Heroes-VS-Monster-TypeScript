@@ -279,7 +279,9 @@ const door4 = new Door([0, 22]);
 const door5 = new Door([3, 2]);
 const wolf = new Loup('../img/wolf.png', [18, 16]);
 const orc = new Orc('../img/orc.png', [23, 9]);
+const orc2 = new Orc('../img/orc.png', [10, 9]);
 const dragon = new Dragonnet('../img/dragonet.png', [17, 24]);
+const dragon2 = new Dragonnet('../img/dragonet.png', [17, 2]);
 let idAdversaireActuel = -1;
 let idChestActuel = -1;
 let idDoorActuel = -1;
@@ -378,6 +380,7 @@ function notOutOfMap(x, y) {
 }
 function deplacer(x, y) {
     tabPortes[idDoorActuel]?.img?.removeEventListener('click', openDoor);
+    tabCoffres[idChestActuel]?.img?.removeEventListener('click', openChest);
     if (notOutOfMap(x, y) && map[positionJoueur[0] + x][positionJoueur[1] + y] != '#' && document.getElementById(`${positionJoueur[0] + x}-${positionJoueur[1] + y}`)?.childNodes.length == 0) {
         positionJoueur[0] += x;
         positionJoueur[1] += y;
@@ -388,8 +391,8 @@ function deplacer(x, y) {
         combat(kratos, tabMonstres[idAdversaireActuel]);
     }
     else if (checkIfCoffre()) {
-        kratos.openChest(tabCoffres[idChestActuel]);
-        tabCoffres[idChestActuel].img.remove();
+        console.log("Cliquez sur le coffre pour l'ouvrir");
+        tabCoffres[idChestActuel].img.addEventListener('click', openChest);
     }
     else if (checkIfDoor()) {
         console.log("Cout de la porte : 5or, cliquez sur la porte pour l'ouvrir");
@@ -399,14 +402,22 @@ function deplacer(x, y) {
 }
 function openDoor() {
     const doorToOpen = tabPortes[idDoorActuel];
-    if (kratos.or >= 5) {
+    if (kratos.or >= 2) {
+        const doorSound = new Audio("../sounds/doorOpen.mp3");
+        doorSound.play();
         doorToOpen.open();
         doorToOpen.img.remove();
-        kratos.or -= 5;
-        console.log('Ouverture de la porte. -5 or...');
+        kratos.or -= 2;
+        console.log('Ouverture de la porte. -2 or...');
     }
     else
         (console.log("Vous n'avez pas assez d'or..."));
+}
+function openChest() {
+    const chestSound = new Audio("../sounds/chestOpen.mp3");
+    chestSound.play();
+    kratos.openChest(tabCoffres[idChestActuel]);
+    tabCoffres[idChestActuel].img.remove();
 }
 async function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -426,6 +437,7 @@ async function combat(hero, monstre) {
         punchSound.play();
         if (!monstre.isAlive) {
             console.log("Après cette attaque, vous avez vaincu le monstre !");
+            kratos.loot(monstre);
             const roarSound = new Audio("../sounds/monsterRoar.mp3");
             roarSound.play();
             monstre.img.remove();

@@ -241,7 +241,7 @@ class Hero extends Personnage {
     }
 
     public loot(monstre: Monstre): void {
-        if (monstre.or) this._or += monstre.or
+        if (monstre.or) this._or += monstre.or;
         if (monstre.cuir) this._cuir += monstre.cuir;
     }
 
@@ -375,7 +375,9 @@ const door5: Door = new Door([3, 2]);
 
 const wolf: Loup = new Loup('../img/wolf.png', [18, 16]);
 const orc: Orc = new Orc('../img/orc.png', [23, 9]);
+const orc2: Orc = new Orc('../img/orc.png', [10, 9]);
 const dragon: Dragonnet = new Dragonnet('../img/dragonet.png', [17, 24]);
+const dragon2: Dragonnet = new Dragonnet('../img/dragonet.png', [17, 2]);
 
 let idAdversaireActuel: number = -1;
 let idChestActuel: number = -1;
@@ -485,6 +487,7 @@ function notOutOfMap(x: number, y: number): boolean {
 
 function deplacer(x: number, y: number): void {
     tabPortes[idDoorActuel]?.img?.removeEventListener('click', openDoor);
+    tabCoffres[idChestActuel]?.img?.removeEventListener('click', openChest);
     if (notOutOfMap(x, y) && map[positionJoueur[0] + x][positionJoueur[1] + y] != '#' && document.getElementById(`${positionJoueur[0] + x}-${positionJoueur[1] + y}`)?.childNodes.length == 0) {
         positionJoueur[0] += x;
         positionJoueur[1] += y;
@@ -496,8 +499,8 @@ function deplacer(x: number, y: number): void {
     }
 
     else if (checkIfCoffre()) {
-        kratos.openChest(tabCoffres[idChestActuel]);
-        tabCoffres[idChestActuel].img.remove();
+        console.log("Cliquez sur le coffre pour l'ouvrir");
+        tabCoffres[idChestActuel].img.addEventListener('click', openChest);
     }
 
     else if(checkIfDoor()) {
@@ -509,13 +512,22 @@ function deplacer(x: number, y: number): void {
 
 function openDoor() {
     const doorToOpen = tabPortes[idDoorActuel];
-    if (kratos.or >= 5) {
+    if (kratos.or >= 2) {
+        const doorSound = new Audio("../sounds/doorOpen.mp3");
+        doorSound.play();
         doorToOpen.open();
         doorToOpen.img.remove();
-        kratos.or -= 5;
-        console.log('Ouverture de la porte. -5 or...');
+        kratos.or -= 2;
+        console.log('Ouverture de la porte. -2 or...');
     }
     else (console.log("Vous n'avez pas assez d'or..."));
+}
+
+function openChest() {
+    const chestSound = new Audio("../sounds/chestOpen.mp3");
+    chestSound.play();
+    kratos.openChest(tabCoffres[idChestActuel]);
+    tabCoffres[idChestActuel].img.remove();
 }
 
 async function delay(ms: number): Promise<void> {
@@ -539,6 +551,7 @@ async function combat(hero: Human, monstre: Monstre): Promise<void> {
 
         if (!monstre.isAlive) {
             console.log("Après cette attaque, vous avez vaincu le monstre !");
+            kratos.loot(monstre);
             const roarSound = new Audio("../sounds/monsterRoar.mp3");
             roarSound.play(); 
             monstre.img.remove();
