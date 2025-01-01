@@ -167,6 +167,12 @@ class Hero extends Personnage {
     get cuir() {
         return this._cuir;
     }
+    set or(value) {
+        this._or = value;
+    }
+    set cuir(value) {
+        this._cuir = value;
+    }
     loot(monstre) {
         if (monstre.or)
             this._or += monstre.or;
@@ -177,7 +183,7 @@ class Hero extends Personnage {
         this.pv = this.maxPv;
     }
     openChest(chest) {
-        if (Math.floor(Math.random()) == 0) {
+        if (Math.floor(Math.random() * 2) == 0) {
             this._cuir += chest.contains;
             console.log(`+${chest.contains}cuir`);
             chest.open();
@@ -371,6 +377,7 @@ function notOutOfMap(x, y) {
         positionJoueur[1] + y <= 27;
 }
 function deplacer(x, y) {
+    tabPortes[idDoorActuel]?.img?.removeEventListener('click', openDoor);
     if (notOutOfMap(x, y) && map[positionJoueur[0] + x][positionJoueur[1] + y] != '#' && document.getElementById(`${positionJoueur[0] + x}-${positionJoueur[1] + y}`)?.childNodes.length == 0) {
         positionJoueur[0] += x;
         positionJoueur[1] += y;
@@ -384,6 +391,22 @@ function deplacer(x, y) {
         kratos.openChest(tabCoffres[idChestActuel]);
         tabCoffres[idChestActuel].img.remove();
     }
+    else if (checkIfDoor()) {
+        console.log("Cout de la porte : 5or, cliquez sur la porte pour l'ouvrir");
+        const doorActuel = tabPortes[idDoorActuel];
+        doorActuel.img.addEventListener('click', openDoor);
+    }
+}
+function openDoor() {
+    const doorToOpen = tabPortes[idDoorActuel];
+    if (kratos.or >= 5) {
+        doorToOpen.open();
+        doorToOpen.img.remove();
+        kratos.or -= 5;
+        console.log('Ouverture de la porte. -5 or...');
+    }
+    else
+        (console.log("Vous n'avez pas assez d'or..."));
 }
 async function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));

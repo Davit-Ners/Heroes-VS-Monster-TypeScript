@@ -179,7 +179,6 @@ class Personnage {
     }
     
     
-    
     public attaque(personnage: Personnage) {
         const de: De = new De(4);
         const modifier: number = this.calculateModifier(this.force);
@@ -233,6 +232,14 @@ class Hero extends Personnage {
         return this._cuir;
     }
 
+    public set or(value: number) {
+        this._or = value;
+    }
+
+    public set cuir(value: number) {
+        this._cuir = value;
+    }
+
     public loot(monstre: Monstre): void {
         if (monstre.or) this._or += monstre.or
         if (monstre.cuir) this._cuir += monstre.cuir;
@@ -243,7 +250,7 @@ class Hero extends Personnage {
     }
 
     public openChest(chest: Chest) {
-        if (Math.floor(Math.random()) == 0) {
+        if (Math.floor(Math.random()*2) == 0) {
             this._cuir += chest.contains;
             console.log(`+${chest.contains}cuir`);
             chest.open();
@@ -477,6 +484,7 @@ function notOutOfMap(x: number, y: number): boolean {
 }
 
 function deplacer(x: number, y: number): void {
+    tabPortes[idDoorActuel]?.img?.removeEventListener('click', openDoor);
     if (notOutOfMap(x, y) && map[positionJoueur[0] + x][positionJoueur[1] + y] != '#' && document.getElementById(`${positionJoueur[0] + x}-${positionJoueur[1] + y}`)?.childNodes.length == 0) {
         positionJoueur[0] += x;
         positionJoueur[1] += y;
@@ -491,6 +499,23 @@ function deplacer(x: number, y: number): void {
         kratos.openChest(tabCoffres[idChestActuel]);
         tabCoffres[idChestActuel].img.remove();
     }
+
+    else if(checkIfDoor()) {
+        console.log("Cout de la porte : 5or, cliquez sur la porte pour l'ouvrir");
+        const doorActuel = tabPortes[idDoorActuel];
+        doorActuel.img.addEventListener('click', openDoor);
+    }
+}
+
+function openDoor() {
+    const doorToOpen = tabPortes[idDoorActuel];
+    if (kratos.or >= 5) {
+        doorToOpen.open();
+        doorToOpen.img.remove();
+        kratos.or -= 5;
+        console.log('Ouverture de la porte. -5 or...');
+    }
+    else (console.log("Vous n'avez pas assez d'or..."));
 }
 
 async function delay(ms: number): Promise<void> {
