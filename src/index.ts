@@ -245,10 +245,12 @@ class Hero extends Personnage {
     public openChest(chest: Chest) {
         if (Math.floor(Math.random()) == 0) {
             this._cuir += chest.contains;
+            console.log(`+${chest.contains}cuir`);
             chest.open();
         }
         else {
             this._or += chest.contains;
+            console.log(`+${chest.contains}or`);
             chest.open();
         }
     }
@@ -286,7 +288,7 @@ class Monstre extends Personnage {
         this._cuir = 0;
         this._position = position;
         this._img.className = 'monster';
-        this._img.id = `${this._id}`;
+        this._img.id = `m${this._id}`;
         
         tabMonstres.push(this);
     }
@@ -369,6 +371,8 @@ const orc: Orc = new Orc('../img/orc.png', [23, 9]);
 const dragon: Dragonnet = new Dragonnet('../img/dragonet.png', [17, 24]);
 
 let idAdversaireActuel: number = -1;
+let idChestActuel: number = -1;
+let idDoorActuel: number = -1;
 
 
 // Fonctions du jeu
@@ -482,6 +486,11 @@ function deplacer(x: number, y: number): void {
         window.removeEventListener('keydown', whichKey);
         combat(kratos, tabMonstres[idAdversaireActuel]);
     }
+
+    else if (checkIfCoffre()) {
+        kratos.openChest(tabCoffres[idChestActuel]);
+        tabCoffres[idChestActuel].img.remove();
+    }
 }
 
 async function delay(ms: number): Promise<void> {
@@ -541,19 +550,43 @@ async function combat(hero: Human, monstre: Monstre): Promise<void> {
     music.currentTime = 0; // Réinitialiser à zéro
 }
 
-function checkIfMonsterAround(): boolean {
-    const voisins: number[][] = [[0, 1],[1, 1],[1, 0],[0,-1],[-1, -1],[-1, 0],[1, -1],[-1, 1]];
+function checkIfObjectAround(className: string, callback: (id: number) => void): boolean {
+    const voisins: number[][] = [
+        [0, 1], [1, 1], [1, 0], [0, -1], 
+        [-1, -1], [-1, 0], [1, -1], [-1, 1]
+    ];
+
     for (const voisin of voisins) {
-        if (document.getElementById(`${positionJoueur[0] + voisin[0]}-${positionJoueur[1] + voisin[1]}`)?.hasChildNodes()) {
-            const img: HTMLImageElement = document.getElementById(`${positionJoueur[0] + voisin[0]}-${positionJoueur[1] + voisin[1]}`)?.firstChild as HTMLImageElement;
-            if (img.className == 'monster') {
-                idAdversaireActuel = Number(img.id);
+        const element = document.getElementById(`${positionJoueur[0] + voisin[0]}-${positionJoueur[1] + voisin[1]}`);
+        if (element?.hasChildNodes()) {
+            const img: HTMLImageElement = element.firstChild as HTMLImageElement;
+            if (img.className === className) {
+                callback(Number(img.id[1]));
                 return true;
             }
         }
     }
     return false;
 }
+
+function checkIfMonsterAround(): boolean {
+    return checkIfObjectAround('monster', (id) => {
+        idAdversaireActuel = id;
+    });
+}
+
+function checkIfCoffre(): boolean {
+    return checkIfObjectAround('chest', (id) => {
+        idChestActuel = id;
+    });
+}
+
+function checkIfDoor(): boolean {
+    return checkIfObjectAround('door', (id) => {
+        idDoorActuel = id;
+    });
+}
+
 
 generateMap();
 placerJoueur();
