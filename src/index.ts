@@ -479,6 +479,7 @@ function deplacer(x: number, y: number): void {
         placerJoueur();
     }
     if (checkIfMonsterAround()) {
+        window.removeEventListener('keydown', whichKey);
         combat(kratos, tabMonstres[idAdversaireActuel]);
     }
 }
@@ -489,15 +490,26 @@ async function delay(ms: number): Promise<void> {
 
 async function combat(hero: Human, monstre: Monstre): Promise<void> {
     console.log("Le combat entre vous et le monstre commence !");
+    const combatSound = new Audio("../sounds/fight.mp3");
+    combatSound.play();
+    await delay(1000);
+    const music = new Audio("../sounds/musicBattle.mp3");
+    music.loop = true;
+    music.play();
     
     while (hero.isAlive && monstre.isAlive) {
         const pvMonstre = monstre.pv;
         hero.attaque(monstre);
+        const punchSound = new Audio("../sounds/punch.mp3");
+        punchSound.play();
 
         if (!monstre.isAlive) {
             console.log("Après cette attaque, vous avez vaincu le monstre !");
+            const roarSound = new Audio("../sounds/monsterRoar.mp3");
+            roarSound.play(); 
             monstre.img.remove();
             hero.repos();
+            window.addEventListener('keydown', whichKey);
             break;
         } else {
             console.log(`Vous avez infligé ${pvMonstre - monstre.pv} de dégat au monstre, il ne lui reste plus que ${monstre.pv} pv !`);
@@ -507,19 +519,26 @@ async function combat(hero: Human, monstre: Monstre): Promise<void> {
 
         if (monstre.isAlive) {
             const pvHero = hero.pv;
-            monstre.attaque(hero);
-
+            monstre.attaque(hero);     
+            const swordSound = new Audio("../sounds/sword.mp3");
+            swordSound.play();
             if (!hero.isAlive) {
+
                 console.log("Après cette attaque du monstre, vous êtes mort !");
+                const looseSound = new Audio("../sounds/loose.mp3");
+                looseSound.play();
                 gameOver = true;
                 break;
             } else {
                 console.log(`Le monstre vous a infligé ${pvHero - hero.pv} de dégat, il ne vous reste plus que ${hero.pv} pv !`);
             }
         }
-        
+
         await delay(1000);
     }
+
+    music.pause();
+    music.currentTime = 0; // Réinitialiser à zéro
 }
 
 function checkIfMonsterAround(): boolean {

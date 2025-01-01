@@ -373,6 +373,7 @@ function deplacer(x, y) {
         placerJoueur();
     }
     if (checkIfMonsterAround()) {
+        window.removeEventListener('keydown', whichKey);
         combat(kratos, tabMonstres[idAdversaireActuel]);
     }
 }
@@ -381,13 +382,24 @@ async function delay(ms) {
 }
 async function combat(hero, monstre) {
     console.log("Le combat entre vous et le monstre commence !");
+    const combatSound = new Audio("../sounds/fight.mp3");
+    combatSound.play();
+    await delay(1000);
+    const music = new Audio("../sounds/musicBattle.mp3");
+    music.loop = true;
+    music.play();
     while (hero.isAlive && monstre.isAlive) {
         const pvMonstre = monstre.pv;
         hero.attaque(monstre);
+        const punchSound = new Audio("../sounds/punch.mp3");
+        punchSound.play();
         if (!monstre.isAlive) {
             console.log("Après cette attaque, vous avez vaincu le monstre !");
+            const roarSound = new Audio("../sounds/monsterRoar.mp3");
+            roarSound.play();
             monstre.img.remove();
             hero.repos();
+            window.addEventListener('keydown', whichKey);
             break;
         }
         else {
@@ -397,8 +409,12 @@ async function combat(hero, monstre) {
         if (monstre.isAlive) {
             const pvHero = hero.pv;
             monstre.attaque(hero);
+            const swordSound = new Audio("../sounds/sword.mp3");
+            swordSound.play();
             if (!hero.isAlive) {
                 console.log("Après cette attaque du monstre, vous êtes mort !");
+                const looseSound = new Audio("../sounds/loose.mp3");
+                looseSound.play();
                 gameOver = true;
                 break;
             }
@@ -408,6 +424,8 @@ async function combat(hero, monstre) {
         }
         await delay(1000);
     }
+    music.pause();
+    music.currentTime = 0; // Réinitialiser à zéro
 }
 function checkIfMonsterAround() {
     const voisins = [[0, 1], [1, 1], [1, 0], [0, -1], [-1, -1], [-1, 0], [1, -1], [-1, 1]];
