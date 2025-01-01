@@ -30,11 +30,50 @@ header {
     color: white;
 }
 
+.jeu {
+    display: flex;
+    justify-content: space-around;
+}
+
+.elements-jeu {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+}
+
+.inventaire {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    border: 2px solid black;
+    padding: 2em;
+}
+
+.pv {
+    border: 2px solid red;
+    padding: 1em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.pvMonster {
+    border: 2px solid rgb(6, 10, 92);
+    padding: 1em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    visibility: hidden;
+}
+
+.indications {
+    width: 250px;
+}
+
 .map {
     width: 560px;
     height: 560px;
     background-color: rgb(34, 33, 33);
-    margin: auto;
     display: flex;
     flex-direction: column;
 }

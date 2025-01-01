@@ -383,6 +383,19 @@ let idAdversaireActuel: number = -1;
 let idChestActuel: number = -1;
 let idDoorActuel: number = -1;
 
+// Elements DOM
+const inventaire: HTMLDivElement = document.getElementById('inventaire') as HTMLDivElement;
+const orJoueur: HTMLParagraphElement = document.createElement('p') as HTMLParagraphElement;
+const cuirJoueur: HTMLParagraphElement = document.createElement('p') as HTMLParagraphElement;
+const pvJoueur: HTMLParagraphElement = document.getElementById('pv') as HTMLParagraphElement;
+inventaire.append(orJoueur, cuirJoueur);
+mettreAJoursInventaire();
+
+const pvMonster: HTMLDivElement = document.querySelector('.pvMonster') as HTMLDivElement;
+const affichePvMonster: HTMLParagraphElement = document.getElementById('pvMonster') as HTMLParagraphElement;
+
+const indications: HTMLParagraphElement = document.getElementById('indications') as HTMLParagraphElement;
+
 
 // Fonctions du jeu
 
@@ -486,6 +499,7 @@ function notOutOfMap(x: number, y: number): boolean {
 }
 
 function deplacer(x: number, y: number): void {
+    indications.textContent = "";
     tabPortes[idDoorActuel]?.img?.removeEventListener('click', openDoor);
     tabCoffres[idChestActuel]?.img?.removeEventListener('click', openChest);
     if (notOutOfMap(x, y) && map[positionJoueur[0] + x][positionJoueur[1] + y] != '#' && document.getElementById(`${positionJoueur[0] + x}-${positionJoueur[1] + y}`)?.childNodes.length == 0) {
@@ -499,12 +513,14 @@ function deplacer(x: number, y: number): void {
     }
 
     else if (checkIfCoffre()) {
+        indications.textContent = "Cliquez sur le coffre pour l'ouvrir";
         console.log("Cliquez sur le coffre pour l'ouvrir");
         tabCoffres[idChestActuel].img.addEventListener('click', openChest);
     }
 
     else if(checkIfDoor()) {
-        console.log("Cout de la porte : 5or, cliquez sur la porte pour l'ouvrir");
+        indications.textContent = "Cout de la porte : 2or, cliquez sur la porte pour l'ouvrir";
+        console.log("Cout de la porte : 2or, cliquez sur la porte pour l'ouvrir");
         const doorActuel = tabPortes[idDoorActuel];
         doorActuel.img.addEventListener('click', openDoor);
     }
@@ -518,9 +534,21 @@ function openDoor() {
         doorToOpen.open();
         doorToOpen.img.remove();
         kratos.or -= 2;
+        indications.textContent = 'Ouverture de la porte. -2 or...';
         console.log('Ouverture de la porte. -2 or...');
+        mettreAJoursInventaire();
+        setTimeout(function() {
+            indications.textContent = "";
+        }, 2000);
     }
-    else (console.log("Vous n'avez pas assez d'or..."));
+    else {
+        indications.textContent = "Vous n'avez pas assez d'or...";
+        mettreAJoursInventaire();
+        setTimeout(function() {
+            indications.textContent = "";
+        }, 2000);
+        console.log("Vous n'avez pas assez d'or...")
+    };
 }
 
 function openChest() {
@@ -528,6 +556,7 @@ function openChest() {
     chestSound.play();
     kratos.openChest(tabCoffres[idChestActuel]);
     tabCoffres[idChestActuel].img.remove();
+    mettreAJoursInventaire();
 }
 
 async function delay(ms: number): Promise<void> {
@@ -535,6 +564,9 @@ async function delay(ms: number): Promise<void> {
 }
 
 async function combat(hero: Human, monstre: Monstre): Promise<void> {
+    pvMonster.style.visibility = 'visible';
+    affichePvMonster.textContent = `PV du monstre : ${monstre.pv} PV`;
+    indications.textContent = "Le combat entre vous et le monstre commence !";
     console.log("Le combat entre vous et le monstre commence !");
     const combatSound = new Audio("../sounds/fight.mp3");
     combatSound.play();
@@ -550,6 +582,7 @@ async function combat(hero: Human, monstre: Monstre): Promise<void> {
         punchSound.play();
 
         if (!monstre.isAlive) {
+            indications.textContent = "Après cette attaque, vous avez vaincu le monstre !";
             console.log("Après cette attaque, vous avez vaincu le monstre !");
             kratos.loot(monstre);
             const roarSound = new Audio("../sounds/monsterRoar.mp3");
@@ -557,26 +590,34 @@ async function combat(hero: Human, monstre: Monstre): Promise<void> {
             monstre.img.remove();
             hero.repos();
             window.addEventListener('keydown', whichKey);
+            mettreAJoursInventaire()
+            setTimeout(function() {
+                indications.textContent = "";
+            }, 1000);
             break;
         } else {
+            indications.textContent = `Vous avez infligé ${pvMonstre - monstre.pv} de dégat au monstre, il ne lui reste plus que ${monstre.pv} pv !`;
             console.log(`Vous avez infligé ${pvMonstre - monstre.pv} de dégat au monstre, il ne lui reste plus que ${monstre.pv} pv !`);
+            affichePvMonster.textContent = `PV du monstre : ${monstre.pv} PV`;
         }
 
         await delay(1000);
 
         if (monstre.isAlive) {
             const pvHero = hero.pv;
-            monstre.attaque(hero);     
+            monstre.attaque(hero);
+            mettreAJoursInventaire();
             const swordSound = new Audio("../sounds/sword.mp3");
             swordSound.play();
             if (!hero.isAlive) {
-
+                indications.textContent = "Après cette attaque du monstre, vous êtes mort !";
                 console.log("Après cette attaque du monstre, vous êtes mort !");
                 const looseSound = new Audio("../sounds/loose.mp3");
                 looseSound.play();
                 gameOver = true;
                 break;
             } else {
+                indications.textContent = `Le monstre vous a infligé ${pvHero - hero.pv} de dégat, il ne vous reste plus que ${hero.pv} pv !`;
                 console.log(`Le monstre vous a infligé ${pvHero - hero.pv} de dégat, il ne vous reste plus que ${hero.pv} pv !`);
             }
         }
@@ -586,6 +627,7 @@ async function combat(hero: Human, monstre: Monstre): Promise<void> {
 
     music.pause();
     music.currentTime = 0; // Réinitialiser à zéro
+    pvMonster.style.visibility = 'hidden';
 }
 
 function checkIfObjectAround(className: string, callback: (id: number) => void): boolean {
@@ -623,6 +665,12 @@ function checkIfDoor(): boolean {
     return checkIfObjectAround('door', (id) => {
         idDoorActuel = id;
     });
+}
+
+function mettreAJoursInventaire() {
+    orJoueur.textContent = `Or : ${kratos.or}`;
+    cuirJoueur.textContent = `Cuir : ${kratos.cuir}`;
+    pvJoueur.textContent = `PV : ${kratos.pv}`;
 }
 
 
