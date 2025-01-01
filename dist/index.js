@@ -4,6 +4,7 @@ let compteurCoffres = 0;
 let compteurPortes = 0;
 const tabCoffres = [];
 const tabPortes = [];
+let gameOver = false;
 class De {
     _nbFaces;
     constructor(nbFaces) {
@@ -200,10 +201,12 @@ class Nain extends Hero {
 class Monstre extends Personnage {
     _or;
     _cuir;
-    constructor(src) {
+    _position;
+    constructor(src, position) {
         super(src);
         this._or = 0;
         this._cuir = 0;
+        this._position = position;
     }
     get or() {
         return this._or;
@@ -211,27 +214,36 @@ class Monstre extends Personnage {
     get cuir() {
         return this._cuir;
     }
+    get position() {
+        return this._position;
+    }
+    ajouter() {
+        document.getElementById(`${this.position[0]}-${this.position[1]}`).append(this.img);
+    }
 }
 class Loup extends Monstre {
-    constructor(src) {
-        super(src);
+    constructor(src, position) {
+        super(src, position);
         this._cuir = 1;
+        this._img.id = 'loup';
     }
 }
 class Orc extends Monstre {
-    constructor(src) {
-        super(src);
+    constructor(src, position) {
+        super(src, position);
         this._or = 1;
+        this._img.id = 'orc';
     }
     get force() {
         return this._force + 1;
     }
 }
 class Dragonnet extends Monstre {
-    constructor(src) {
-        super(src);
+    constructor(src, position) {
+        super(src, position);
         this._or = 1;
         this._cuir = 1;
+        this._img.id = 'dragonnet';
     }
     get end() {
         return this._end + 1;
@@ -251,13 +263,16 @@ const door1 = new Door([18, 4]);
 const door2 = new Door([16, 24]);
 const door3 = new Door([11, 9]);
 const door4 = new Door([0, 22]);
-const wolf = new Loup('../img/wolf.png');
+const door5 = new Door([3, 2]);
+const wolf = new Loup('../img/wolf.png', [18, 16]);
+const orc = new Orc('../img/orc.png', [23, 9]);
+const dragon = new Dragonnet('../img/dragonet.png', [17, 24]);
 // Fonctions du jeu
 const map = [
     ['#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '-', '#', '#', '#', '#', '#'],
     ['#', '#', '.', '.', '.', '#', '-', '.', '.', '.', '-', '#', '.', '.', '.', '.', '.', '.', '#', '#', '-', '.', '.', '.', '-', '#', '#', '#'],
     ['#', '.', '.', '~', '~', '#', '-', '.', '#', '#', '-', '#', '#', '#', '#', '#', '.', '.', '#', '#', '-', '.', '.', '.', '-', '#', '#', '#'],
-    ['#', '#', '.', '~', '~', '#', '-', '.', '#', '#', '-', '-', '-', '-', '-', '#', '.', '.', '.', '#', '-', '.', '.', '.', '-', '#', '#', '#'],
+    ['#', '#', '.', '#', '#', '#', '-', '.', '#', '#', '-', '-', '-', '-', '-', '#', '.', '.', '.', '#', '-', '.', '.', '.', '-', '#', '#', '#'],
     ['-', '-', '-', '~', '~', '-', '-', '.', '.', '.', '.', '.', '.', '.', '-', '-', '-', '-', '-', '-', '-', '.', '.', '.', '-', '-', '-', '-'],
     ['-', '.', '.', '~', '~', '~', '~', '~', '~', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '-'],
     ['-', '.', '.', '.', '.', '~', '~', '~', '~', '~', '~', '~', '~', '~', '~', '~', '~', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '-'],
@@ -267,12 +282,12 @@ const map = [
     ['#', '#', '#', '#', '#', '#', '#', '#', '#', '.', '-', '-', '-', '-', '-', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#'],
     ['#', '#', '#', '.', '.', '.', '-', '.', '#', '-', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#'],
     ['#', '#', '#', '.', '.', '.', '-', '.', '#', '-', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#'],
-    ['#', '#', '#', '.', '.', '.', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '#', '#', '#'],
-    ['#', '#', '#', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '#', '#', '#'],
-    ['#', '#', '#', '#', '#', '#', '#', '-', '-', '-', '-', '-', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '-', '-', '#', '#'],
-    ['#', '#', '.', '.', '.', '.', '-', '.', '.', '.', '-', '#', '.', '.', '.', '.', '.', '.', '#', '#', '-', '.', '.', '#', '-', '#', '#', '#'],
-    ['#', '.', '.', '-', '-', '.', '-', '.', '#', '#', '#', '#', '#', '#', '#', '#', '.', '.', '#', '#', '-', '.', '#', '#', '-', '#', '#', '#'],
-    ['#', '#', '#', '#', '-', '#', '#', '#', '#', '#', '-', '-', '-', '-', '-', '#', '.', '.', '.', '#', '-', '.', '.', '.', '-', '#', '#', '#'],
+    ['#', '#', '#', '.', '.', '.', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '#', '#', '#', '#'],
+    ['#', '#', '#', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '#', '#', '#', '#'],
+    ['#', '#', '#', '#', '#', '#', '#', '-', '-', '-', '-', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '-', '-', '#', '#'],
+    ['#', '#', '.', '.', '.', '.', '-', '.', '.', '.', '-', '#', '.', '.', '.', '.', '.', '#', '#', '#', '-', '.', '.', '#', '-', '#', '#', '#'],
+    ['#', '.', '.', '-', '-', '.', '-', '.', '#', '#', '#', '#', '#', '#', '#', '#', '.', '#', '#', '#', '-', '.', '#', '#', '-', '#', '#', '#'],
+    ['#', '#', '#', '#', '-', '#', '#', '#', '#', '#', '-', '-', '-', '-', '-', '#', '.', '#', '#', '#', '-', '.', '.', '.', '-', '#', '#', '#'],
     ['-', '-', '-', '-', '-', '-', '-', '.', '.', '.', '.', '.', '.', '.', '-', '-', '-', '-', '-', '-', '-', '.', '.', '.', '-', '-', '-', '-'],
     ['-', '.', '.', '-', '-', '~', '~', '~', '~', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '-'],
     ['-', '.', '.', '.', '.', '~', '~', '~', '~', '~', '~', '~', '~', '~', '~', '~', '~', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '-'],
@@ -348,6 +363,34 @@ function deplacer(x, y) {
         positionJoueur[1] += y;
         placerJoueur();
     }
+}
+function combat(hero, monstre) {
+    console.log("Le combat entre vous et le monstre commence !");
+    while (hero.isAlive && monstre.isAlive) {
+        const pvMonstre = monstre.pv;
+        hero.attaque(monstre);
+        if (!monstre.isAlive) {
+            console.log("Après cette attaque, vous avez vaincu le monstre !");
+            monstre.img.remove();
+        }
+        else {
+            console.log(`Vous avez infligé ${pvMonstre - monstre.pv} de dégat au monstre, il ne lui reste plus que ${monstre.pv} pv !`);
+        }
+        if (monstre.isAlive) {
+            const pvHero = hero.pv;
+            monstre.attaque(hero);
+            if (!hero.isAlive) {
+                console.log("Après cette attaque du monstre, vous êtes mort !");
+                gameOver = true;
+            }
+            else {
+                console.log(`Le monstre vous a infligé ${pvHero - hero.pv} de dégat, il ne vous reste plus que ${hero.pv} pv !`);
+            }
+        }
+    }
+}
+function checkIfMonsterAround() {
+    const voisins = [[0, 1], [1, 1], [1, 0], [0, -1], [-1, -1], [-1, 0], [1, -1], [-1, 1]];
 }
 generateMap();
 placerJoueur();

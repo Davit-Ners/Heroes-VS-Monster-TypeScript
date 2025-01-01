@@ -4,6 +4,7 @@ let compteurCoffres: number = 0;
 let compteurPortes: number = 0;
 const tabCoffres: Chest[] = [];
 const tabPortes: Door[] = [];
+let gameOver: boolean = false;
 
 
 class De {
@@ -272,11 +273,13 @@ class Monstre extends Personnage {
 
     protected _or: number;
     protected _cuir: number;
+    protected _position: number[];
 
-    constructor(src: string) {
+    constructor(src: string, position: number[]) {
         super(src);
         this._or = 0;
         this._cuir = 0;
+        this._position = position;
     }
 
     public get or(): number {
@@ -287,22 +290,32 @@ class Monstre extends Personnage {
         return this._cuir;
     }
 
+    public get position(): number[] {
+        return this._position;
+    }
+
+    protected ajouter(): void {
+        document.getElementById(`${this.position[0]}-${this.position[1]}`)!.append(this.img);
+    }
+
 }
 
 class Loup extends Monstre {
 
-    constructor(src: string) {
-        super(src);
+    constructor(src: string, position: number[]) {
+        super(src, position);
         this._cuir = 1;
+        this._img.id = 'loup';
     }
 
 }
 
 class Orc extends Monstre {
 
-    constructor(src: string) {
-        super(src);
+    constructor(src: string, position: number[]) {
+        super(src, position);
         this._or = 1;
+        this._img.id = 'orc';
     }
 
     get force(): number {
@@ -313,10 +326,11 @@ class Orc extends Monstre {
 
 class Dragonnet extends Monstre {
 
-    constructor(src: string) {
-        super(src);
+    constructor(src: string, position: number[]) {
+        super(src, position);
         this._or = 1;
         this._cuir = 1;
+        this._img.id = 'dragonnet';
     }
 
     get end(): number {
@@ -342,8 +356,11 @@ const door1: Door = new Door([18, 4]);
 const door2: Door = new Door([16, 24]);
 const door3: Door = new Door([11, 9]);
 const door4: Door = new Door([0, 22]);
+const door5: Door = new Door([3, 2]);
 
-const wolf: Loup = new Loup('../img/wolf.png');
+const wolf: Loup = new Loup('../img/wolf.png', [18, 16]);
+const orc: Orc = new Orc('../img/orc.png', [23, 9]);
+const dragon: Dragonnet = new Dragonnet('../img/dragonet.png', [17, 24]);
 
 // Fonctions du jeu
 
@@ -351,7 +368,7 @@ const map: string[][] = [
     ['#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '-', '#', '#', '#', '#', '#'],
     ['#', '#', '.', '.', '.', '#', '-', '.', '.', '.', '-', '#', '.', '.', '.', '.', '.', '.', '#', '#', '-', '.', '.', '.', '-', '#', '#', '#'],
     ['#', '.', '.', '~', '~', '#', '-', '.', '#', '#', '-', '#', '#', '#', '#', '#', '.', '.', '#', '#', '-', '.', '.', '.', '-', '#', '#', '#'],
-    ['#', '#', '.', '~', '~', '#', '-', '.', '#', '#', '-', '-', '-', '-', '-', '#', '.', '.', '.', '#', '-', '.', '.', '.', '-', '#', '#', '#'],
+    ['#', '#', '.', '#', '#', '#', '-', '.', '#', '#', '-', '-', '-', '-', '-', '#', '.', '.', '.', '#', '-', '.', '.', '.', '-', '#', '#', '#'],
     ['-', '-', '-', '~', '~', '-', '-', '.', '.', '.', '.', '.', '.', '.', '-', '-', '-', '-', '-', '-', '-', '.', '.', '.', '-', '-', '-', '-'],
     ['-', '.', '.', '~', '~', '~', '~', '~', '~', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '-'],
     ['-', '.', '.', '.', '.', '~', '~', '~', '~', '~', '~', '~', '~', '~', '~', '~', '~', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '-'],
@@ -361,12 +378,12 @@ const map: string[][] = [
     ['#', '#', '#', '#', '#', '#', '#', '#', '#', '.', '-', '-', '-', '-', '-', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#'],
     ['#', '#', '#', '.', '.', '.', '-', '.', '#', '-', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#'],
     ['#', '#', '#', '.', '.', '.', '-', '.', '#', '-', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#'],
-    ['#', '#', '#', '.', '.', '.', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '#', '#', '#'],
-    ['#', '#', '#', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '#', '#', '#'],
-    ['#', '#', '#', '#', '#', '#', '#', '-', '-', '-', '-', '-', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '-', '-', '#', '#'],
-    ['#', '#', '.', '.', '.', '.', '-', '.', '.', '.', '-', '#', '.', '.', '.', '.', '.', '.', '#', '#', '-', '.', '.', '#', '-', '#', '#', '#'],
-    ['#', '.', '.', '-', '-', '.', '-', '.', '#', '#', '#', '#', '#', '#', '#', '#', '.', '.', '#', '#', '-', '.', '#', '#', '-', '#', '#', '#'],
-    ['#', '#', '#', '#', '-', '#', '#', '#', '#', '#', '-', '-', '-', '-', '-', '#', '.', '.', '.', '#', '-', '.', '.', '.', '-', '#', '#', '#'],
+    ['#', '#', '#', '.', '.', '.', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '#', '#', '#', '#'],
+    ['#', '#', '#', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '#', '#', '#', '#'],
+    ['#', '#', '#', '#', '#', '#', '#', '-', '-', '-', '-', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '-', '-', '#', '#'],
+    ['#', '#', '.', '.', '.', '.', '-', '.', '.', '.', '-', '#', '.', '.', '.', '.', '.', '#', '#', '#', '-', '.', '.', '#', '-', '#', '#', '#'],
+    ['#', '.', '.', '-', '-', '.', '-', '.', '#', '#', '#', '#', '#', '#', '#', '#', '.', '#', '#', '#', '-', '.', '#', '#', '-', '#', '#', '#'],
+    ['#', '#', '#', '#', '-', '#', '#', '#', '#', '#', '-', '-', '-', '-', '-', '#', '.', '#', '#', '#', '-', '.', '.', '.', '-', '#', '#', '#'],
     ['-', '-', '-', '-', '-', '-', '-', '.', '.', '.', '.', '.', '.', '.', '-', '-', '-', '-', '-', '-', '-', '.', '.', '.', '-', '-', '-', '-'],
     ['-', '.', '.', '-', '-', '~', '~', '~', '~', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '-'],
     ['-', '.', '.', '.', '.', '~', '~', '~', '~', '~', '~', '~', '~', '~', '~', '~', '~', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '-'],
@@ -448,6 +465,37 @@ function deplacer(x: number, y: number): void {
         positionJoueur[1] += y;
         placerJoueur();
     }
+}
+
+function combat(hero: Human, monstre: Monstre): void {
+    console.log("Le combat entre vous et le monstre commence !");
+    while (hero.isAlive && monstre.isAlive) {
+        const pvMonstre = monstre.pv;
+        hero.attaque(monstre);
+        if (!monstre.isAlive) {
+            console.log("Après cette attaque, vous avez vaincu le monstre !");
+            monstre.img.remove();
+        }
+        else {
+            console.log(`Vous avez infligé ${pvMonstre-monstre.pv} de dégat au monstre, il ne lui reste plus que ${monstre.pv} pv !`);
+        }
+        if (monstre.isAlive) {
+            const pvHero = hero.pv;
+            monstre.attaque(hero);
+            if (!hero.isAlive) {
+                console.log("Après cette attaque du monstre, vous êtes mort !");
+                gameOver = true;
+            }
+            else {
+                console.log(`Le monstre vous a infligé ${pvHero-hero.pv} de dégat, il ne vous reste plus que ${hero.pv} pv !`);
+            }
+        }
+    }
+}
+
+function checkIfMonsterAround(): boolean {
+    const voisins: number[][] = [[0, 1],[1, 1],[1, 0],[0,-1],[-1, -1],[-1, 0],[1, -1],[-1, 1]];
+
 }
 
 generateMap();
