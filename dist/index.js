@@ -2,8 +2,10 @@
 // Création des personnages du jeu
 let compteurCoffres = 0;
 let compteurPortes = 0;
+let compteurMonstres = 0;
 const tabCoffres = [];
 const tabPortes = [];
+const tabMonstres = [];
 let gameOver = false;
 class De {
     _nbFaces;
@@ -202,11 +204,17 @@ class Monstre extends Personnage {
     _or;
     _cuir;
     _position;
+    _id;
     constructor(src, position) {
         super(src);
+        this._id = compteurMonstres;
+        compteurMonstres++;
         this._or = 0;
         this._cuir = 0;
         this._position = position;
+        this._img.className = 'monster';
+        this._img.id = `${this._id}`;
+        tabMonstres.push(this);
     }
     get or() {
         return this._or;
@@ -225,14 +233,12 @@ class Loup extends Monstre {
     constructor(src, position) {
         super(src, position);
         this._cuir = 1;
-        this._img.id = 'loup';
     }
 }
 class Orc extends Monstre {
     constructor(src, position) {
         super(src, position);
         this._or = 1;
-        this._img.id = 'orc';
     }
     get force() {
         return this._force + 1;
@@ -243,7 +249,6 @@ class Dragonnet extends Monstre {
         super(src, position);
         this._or = 1;
         this._cuir = 1;
-        this._img.id = 'dragonnet';
     }
     get end() {
         return this._end + 1;
@@ -267,6 +272,7 @@ const door5 = new Door([3, 2]);
 const wolf = new Loup('../img/wolf.png', [18, 16]);
 const orc = new Orc('../img/orc.png', [23, 9]);
 const dragon = new Dragonnet('../img/dragonet.png', [17, 24]);
+let idAdversaireActuel = -1;
 // Fonctions du jeu
 const map = [
     ['#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '-', '#', '#', '#', '#', '#'],
@@ -332,6 +338,9 @@ function generateMap() {
     for (const door of tabPortes) {
         document.getElementById(`${door.position[0]}-${door.position[1]}`).append(door.img);
     }
+    for (const monster of tabMonstres) {
+        document.getElementById(`${monster.position[0]}-${monster.position[1]}`).append(monster.img);
+    }
 }
 function placerJoueur() {
     document.getElementById(`${positionJoueur[0]}-${positionJoueur[1]}`).append(kratos.img);
@@ -363,8 +372,14 @@ function deplacer(x, y) {
         positionJoueur[1] += y;
         placerJoueur();
     }
+    if (checkIfMonsterAround()) {
+        combat(kratos, tabMonstres[idAdversaireActuel]);
+    }
 }
-function combat(hero, monstre) {
+async function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+async function combat(hero, monstre) {
     console.log("Le combat entre vous et le monstre commence !");
     while (hero.isAlive && monstre.isAlive) {
         const pvMonstre = monstre.pv;
@@ -372,25 +387,40 @@ function combat(hero, monstre) {
         if (!monstre.isAlive) {
             console.log("Après cette attaque, vous avez vaincu le monstre !");
             monstre.img.remove();
+            hero.repos();
+            break;
         }
         else {
             console.log(`Vous avez infligé ${pvMonstre - monstre.pv} de dégat au monstre, il ne lui reste plus que ${monstre.pv} pv !`);
         }
+        await delay(1000);
         if (monstre.isAlive) {
             const pvHero = hero.pv;
             monstre.attaque(hero);
             if (!hero.isAlive) {
                 console.log("Après cette attaque du monstre, vous êtes mort !");
                 gameOver = true;
+                break;
             }
             else {
                 console.log(`Le monstre vous a infligé ${pvHero - hero.pv} de dégat, il ne vous reste plus que ${hero.pv} pv !`);
             }
         }
+        await delay(1000);
     }
 }
 function checkIfMonsterAround() {
     const voisins = [[0, 1], [1, 1], [1, 0], [0, -1], [-1, -1], [-1, 0], [1, -1], [-1, 1]];
+    for (const voisin of voisins) {
+        if (document.getElementById(`${positionJoueur[0] + voisin[0]}-${positionJoueur[1] + voisin[1]}`)?.hasChildNodes()) {
+            const img = document.getElementById(`${positionJoueur[0] + voisin[0]}-${positionJoueur[1] + voisin[1]}`)?.firstChild;
+            if (img.className == 'monster') {
+                idAdversaireActuel = Number(img.id);
+                return true;
+            }
+        }
+    }
+    return false;
 }
 generateMap();
 placerJoueur();

@@ -2,8 +2,10 @@
 
 let compteurCoffres: number = 0;
 let compteurPortes: number = 0;
+let compteurMonstres: number = 0;
 const tabCoffres: Chest[] = [];
 const tabPortes: Door[] = [];
+const tabMonstres: Monstre[] = [];
 let gameOver: boolean = false;
 
 
@@ -274,12 +276,19 @@ class Monstre extends Personnage {
     protected _or: number;
     protected _cuir: number;
     protected _position: number[];
+    protected _id: number;
 
     constructor(src: string, position: number[]) {
         super(src);
+        this._id = compteurMonstres;
+        compteurMonstres++;
         this._or = 0;
         this._cuir = 0;
         this._position = position;
+        this._img.className = 'monster';
+        this._img.id = `${this._id}`;
+        
+        tabMonstres.push(this);
     }
 
     public get or(): number {
@@ -305,7 +314,6 @@ class Loup extends Monstre {
     constructor(src: string, position: number[]) {
         super(src, position);
         this._cuir = 1;
-        this._img.id = 'loup';
     }
 
 }
@@ -315,7 +323,6 @@ class Orc extends Monstre {
     constructor(src: string, position: number[]) {
         super(src, position);
         this._or = 1;
-        this._img.id = 'orc';
     }
 
     get force(): number {
@@ -330,7 +337,6 @@ class Dragonnet extends Monstre {
         super(src, position);
         this._or = 1;
         this._cuir = 1;
-        this._img.id = 'dragonnet';
     }
 
     get end(): number {
@@ -361,6 +367,9 @@ const door5: Door = new Door([3, 2]);
 const wolf: Loup = new Loup('../img/wolf.png', [18, 16]);
 const orc: Orc = new Orc('../img/orc.png', [23, 9]);
 const dragon: Dragonnet = new Dragonnet('../img/dragonet.png', [17, 24]);
+
+let idAdversaireActuel: number = -1;
+
 
 // Fonctions du jeu
 
@@ -433,6 +442,10 @@ function generateMap(): void {
     for (const door of tabPortes) {
         document.getElementById(`${door.position[0]}-${door.position[1]}`)!.append(door.img);
     }
+
+    for (const monster of tabMonstres) {
+        document.getElementById(`${monster.position[0]}-${monster.position[1]}`)!.append(monster.img);
+    }
 }
 
 function placerJoueur(): void {
@@ -465,37 +478,62 @@ function deplacer(x: number, y: number): void {
         positionJoueur[1] += y;
         placerJoueur();
     }
+    if (checkIfMonsterAround()) {
+        combat(kratos, tabMonstres[idAdversaireActuel]);
+    }
 }
 
-function combat(hero: Human, monstre: Monstre): void {
+async function delay(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function combat(hero: Human, monstre: Monstre): Promise<void> {
     console.log("Le combat entre vous et le monstre commence !");
+    
     while (hero.isAlive && monstre.isAlive) {
         const pvMonstre = monstre.pv;
         hero.attaque(monstre);
+
         if (!monstre.isAlive) {
             console.log("Après cette attaque, vous avez vaincu le monstre !");
             monstre.img.remove();
+            hero.repos();
+            break;
+        } else {
+            console.log(`Vous avez infligé ${pvMonstre - monstre.pv} de dégat au monstre, il ne lui reste plus que ${monstre.pv} pv !`);
         }
-        else {
-            console.log(`Vous avez infligé ${pvMonstre-monstre.pv} de dégat au monstre, il ne lui reste plus que ${monstre.pv} pv !`);
-        }
+
+        await delay(1000);
+
         if (monstre.isAlive) {
             const pvHero = hero.pv;
             monstre.attaque(hero);
+
             if (!hero.isAlive) {
                 console.log("Après cette attaque du monstre, vous êtes mort !");
                 gameOver = true;
-            }
-            else {
-                console.log(`Le monstre vous a infligé ${pvHero-hero.pv} de dégat, il ne vous reste plus que ${hero.pv} pv !`);
+                break;
+            } else {
+                console.log(`Le monstre vous a infligé ${pvHero - hero.pv} de dégat, il ne vous reste plus que ${hero.pv} pv !`);
             }
         }
+        
+        await delay(1000);
     }
 }
 
 function checkIfMonsterAround(): boolean {
     const voisins: number[][] = [[0, 1],[1, 1],[1, 0],[0,-1],[-1, -1],[-1, 0],[1, -1],[-1, 1]];
-
+    for (const voisin of voisins) {
+        if (document.getElementById(`${positionJoueur[0] + voisin[0]}-${positionJoueur[1] + voisin[1]}`)?.hasChildNodes()) {
+            const img: HTMLImageElement = document.getElementById(`${positionJoueur[0] + voisin[0]}-${positionJoueur[1] + voisin[1]}`)?.firstChild as HTMLImageElement;
+            if (img.className == 'monster') {
+                idAdversaireActuel = Number(img.id);
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 generateMap();
