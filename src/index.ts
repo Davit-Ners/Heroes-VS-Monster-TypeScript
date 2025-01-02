@@ -3,8 +3,10 @@
 let compteurCoffres: number = 0;
 let compteurPortes: number = 0;
 let compteurMonstres: number = 0;
+let compteurCraft: number = 0;
 const tabCoffres: Chest[] = [];
 const tabPortes: Door[] = [];
+const tabCraft: CraftTable[] = [];
 const tabMonstres: Monstre[] = [];
 let gameOver: boolean = false;
 
@@ -28,28 +30,42 @@ class De {
 
 }
 
-class Chest {
+class GameObject {
+    protected _position: number[];
+    protected _img: HTMLImageElement;
+    protected _id: number;
+
+    constructor(position: number[], src: string, className: string, idPrefix: string, idCounter: () => number) {
+        this._position = position;
+        this._img = document.createElement('img');
+        this._img.src = src;
+        this._img.className = className;
+        this._id = idCounter();
+        this._img.id = `${idPrefix}${this._id}`;
+    }
+
+    public get position(): number[] {
+        return this._position;
+    }
+
+    public get img(): HTMLImageElement {
+        return this._img;
+    }
+
+    public get id(): number {
+        return this._id;
+    }
+}
+
+class Chest extends GameObject {
 
     private _contains: number;
     private _opened: boolean;
-    private _position: number[];
-    private _img: HTMLImageElement;
-    private _id: number;
 
     constructor(position: number[]) {
-        this._contains = Math.ceil(Math.random()*15);
+        super(position, '../img/coffre.png', 'chest', 'c', () => compteurCoffres++);
+        this._contains = Math.ceil(Math.random() * 15);
         this._opened = false;
-        this._position = position;
-
-        this._img = document.createElement('img');
-        this._img.src = '../img/coffre.png';
-        this._img.className = 'chest';
-
-        this._id = compteurCoffres;
-        compteurCoffres++;
-
-        this._img.id = `c${this._id}`;
-
         tabCoffres.push(this);
     }
 
@@ -76,30 +92,18 @@ class Chest {
     public open(): void {
         this._contains = 0;
         this._opened = true;
+        this.img.remove();
     }
 
 }
 
-class Door {
+class Door extends GameObject {
 
     private _opened: boolean;
-    private _position: number[];
-    private _img: HTMLImageElement;
-    private _id: number;
 
     constructor(position: number[]) {
+        super(position, '../img/porte.jpg', 'door', 'd', () => compteurPortes++);
         this._opened = false;
-        this._position = position;
-
-        this._img = document.createElement('img');
-        this._img.src = '../img/porte.jpg';
-        this._img.className = 'door';
-
-        this._id = compteurPortes;
-        compteurPortes++;
-
-        this._img.id = `d${this._id}`;
-
         tabPortes.push(this);
     }
 
@@ -121,8 +125,31 @@ class Door {
 
     public open(): void {
         this._opened = true;
+        this.img.remove();
     }
 
+}
+
+class CraftTable extends GameObject {
+    private _price: number
+    
+    constructor(position: number[]) {
+        super(position, '../img/craft.png', 'craft', 't', () => compteurCraft++);
+        this._price = 3;
+
+        tabCraft.push(this);
+    }
+
+    public get price(): number {
+        return this._price;
+    }
+
+    public getAxe(): void {
+        if (!kratos.hasAxe) {
+            kratos.cuir -= 3;
+            kratos.hasAxe = true;
+        }
+    }
 }
 
 class Personnage {
@@ -184,11 +211,11 @@ class Personnage {
         const modifier: number = this.calculateModifier(this.force);
         const degat = de.lancer() + modifier;
 
-        personnage._pv -= degat;
+        personnage.pv -= degat;
         if (personnage.pv < 0) personnage.pv = 0;
     }
 
-    private calculerStates(): number {
+    protected calculerStates(): number {
 
         let tabRand: number[] = [];
         const de: De = new De(6);
@@ -204,7 +231,7 @@ class Personnage {
 
     }
 
-    private calculateModifier(stat: number): number {
+    protected calculateModifier(stat: number): number {
         if (stat < 5) return -1;
         if (stat < 10) return 0;
         if (stat < 15) return 1;
@@ -265,12 +292,39 @@ class Hero extends Personnage {
 }
 
 class Human extends Hero {
+    private _hasAxe: boolean;
+
+    constructor(src: string) {
+        super(src);
+        this._hasAxe = false;
+    }
+
     get end(): number {
         return this._end + 1;
     }
 
     get force(): number {
         return this._force + 1;
+    }
+
+    get hasAxe(): boolean {
+        return this._hasAxe;
+    }
+
+    set hasAxe(value: boolean) {
+        this._hasAxe = value;
+    }
+
+    public attaque(personnage: Personnage) {
+        const de: De = new De(4);
+        const modifier: number = this.calculateModifier(this.force);
+        const degat = de.lancer() + modifier;
+
+        personnage.pv -= degat;
+        if (this.hasAxe) {
+            personnage.pv -= 3;
+        }
+        if (personnage.pv < 0) personnage.pv = 0;
     }
 }
 
@@ -373,15 +427,21 @@ const door3: Door = new Door([11, 9]);
 const door4: Door = new Door([0, 22]);
 const door5: Door = new Door([3, 2]);
 
+const tableCraft1: CraftTable = new CraftTable([16, 22]);
+
 const wolf: Loup = new Loup('../img/wolf.png', [18, 16]);
-const orc: Orc = new Orc('../img/orc.png', [23, 9]);
+const wolf2: Loup = new Loup('../img/wolf.png', [1, 22]);
+const orc: Orc = new Orc('../img/orc.png', [24, 9]);
 const orc2: Orc = new Orc('../img/orc.png', [10, 9]);
+const orc3: Orc = new Orc('../img/orc.png', [3, 17]);
 const dragon: Dragonnet = new Dragonnet('../img/dragonet.png', [17, 24]);
 const dragon2: Dragonnet = new Dragonnet('../img/dragonet.png', [17, 2]);
+const dragon3: Dragonnet = new Dragonnet('../img/dragonet.png', [2, 2]);
 
 let idAdversaireActuel: number = -1;
 let idChestActuel: number = -1;
 let idDoorActuel: number = -1;
+let idCraftActuel: number = -1;
 
 // Elements DOM
 const inventaire: HTMLDivElement = document.getElementById('inventaire') as HTMLDivElement;
@@ -395,6 +455,7 @@ const pvMonster: HTMLDivElement = document.querySelector('.pvMonster') as HTMLDi
 const affichePvMonster: HTMLParagraphElement = document.getElementById('pvMonster') as HTMLParagraphElement;
 
 const indications: HTMLParagraphElement = document.getElementById('indications') as HTMLParagraphElement;
+let degatInt: number = -1;
 
 
 // Fonctions du jeu
@@ -402,13 +463,13 @@ const indications: HTMLParagraphElement = document.getElementById('indications')
 const map: string[][] = [
     ['#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '-', '#', '#', '#', '#', '#'],
     ['#', '#', '.', '.', '.', '#', '-', '.', '.', '.', '-', '#', '.', '.', '.', '.', '.', '.', '#', '#', '-', '.', '.', '.', '-', '#', '#', '#'],
-    ['#', '.', '.', '~', '~', '#', '-', '.', '#', '#', '-', '#', '#', '#', '#', '#', '.', '.', '#', '#', '-', '.', '.', '.', '-', '#', '#', '#'],
+    ['#', '.', '.', 'F', 'F', '#', '-', '.', '#', '#', '-', '#', '#', '#', '#', '#', '.', '.', '#', '#', '-', '.', '.', '.', '-', '#', '#', '#'],
     ['#', '#', '.', '#', '#', '#', '-', '.', '#', '#', '-', '-', '-', '-', '-', '#', '.', '.', '.', '#', '-', '.', '.', '.', '-', '#', '#', '#'],
-    ['-', '-', '-', '~', '~', '-', '-', '.', '.', '.', '.', '.', '.', '.', '-', '-', '-', '-', '-', '-', '-', '.', '.', '.', '-', '-', '-', '-'],
-    ['-', '.', '.', '~', '~', '~', '~', '~', '~', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '-'],
-    ['-', '.', '.', '.', '.', '~', '~', '~', '~', '~', '~', '~', '~', '~', '~', '~', '~', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '-'],
-    ['-', '.', '#', '#', '#', '#', '#', '#', '~', '~', '~', '~', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '.', '.', '.', '.', '-', '-'],
-    ['-', '.', '#', '#', '#', '#', '#', '#', '~', '~', '~', '~', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '.', '.', '.', '.', '-', '-'],
+    ['-', '-', '-', 'F', 'F', '-', '-', '.', '.', '.', '.', '.', '.', '.', '-', '-', '-', '-', '-', '-', '-', '.', '.', '.', '-', '-', '-', '-'],
+    ['-', '.', '.', 'F', 'F', 'F', 'F', 'F', 'F', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '-'],
+    ['-', '.', '.', '.', '.', 'F', 'F', 'F', 'F', 'F', 'F', 'F', 'F', 'F', 'F', 'F', 'F', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '-'],
+    ['-', '.', '#', '#', '#', '#', '#', '#', 'F', 'F', 'F', 'F', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '.', '.', '.', '.', '-', '-'],
+    ['-', '.', '#', '#', '#', '#', '#', '#', 'F', 'F', 'F', 'F', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '.', '.', '.', '.', '-', '-'],
     ['-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-'],
     ['#', '#', '#', '#', '#', '#', '#', '#', '#', '.', '-', '-', '-', '-', '-', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#'],
     ['#', '#', '#', '.', '.', '.', '-', '.', '#', '-', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#'],
@@ -420,10 +481,10 @@ const map: string[][] = [
     ['#', '.', '.', '-', '-', '.', '-', '.', '#', '#', '#', '#', '#', '#', '#', '#', '.', '#', '#', '#', '-', '.', '#', '#', '-', '#', '#', '#'],
     ['#', '#', '#', '#', '-', '#', '#', '#', '#', '#', '-', '-', '-', '-', '-', '#', '.', '#', '#', '#', '-', '.', '.', '.', '-', '#', '#', '#'],
     ['-', '-', '-', '-', '-', '-', '-', '.', '.', '.', '.', '.', '.', '.', '-', '-', '-', '-', '-', '-', '-', '.', '.', '.', '-', '-', '-', '-'],
-    ['-', '.', '.', '-', '-', '~', '~', '~', '~', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '-'],
+    ['-', '.', '.', '-', '-', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '-'],
     ['-', '.', '.', '.', '.', '~', '~', '~', '~', '~', '~', '~', '~', '~', '~', '~', '~', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '-'],
-    ['-', '.', '#', '#', '#', '#', '#', '#', '~', '~', '~', '~', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '.', '.', '.', '.', '-', '-'],
-    ['-', '.', '#', '#', '#', '#', '#', '#', '~', '~', '~', '~', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '.', '.', '.', '.', '-', '-'],
+    ['-', '.', '#', '#', '#', '#', '#', '#', 'F', 'F', 'F', 'F', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '.', '.', '.', '.', '-', '-'],
+    ['-', '.', '#', '#', '#', '#', '#', '#', 'F', 'F', 'F', 'F', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '.', '.', '.', '.', '-', '-'],
     ['-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-'],
     ['#', '#', '#', '#', '#', '#', '-', '.', '.', '.', '-', '-', '-', '-', '-', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#'],
     ['#', '#', '#', '.', '.', '.', '-', '.', '#', '-', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#'],
@@ -449,6 +510,9 @@ function generateMap(): void {
             else if (block == '-') {
                 carre.className = 'block route';
             }
+            else if (block == 'F') {
+                carre.className = 'block feu';
+            }
             else {
                 carre.className = 'block sol';
             }
@@ -471,6 +535,10 @@ function generateMap(): void {
 
     for (const monster of tabMonstres) {
         document.getElementById(`${monster.position[0]}-${monster.position[1]}`)!.append(monster.img);
+    }
+
+    for (const table of tabCraft) {
+        document.getElementById(`${table.position[0]}-${table.position[1]}`)!.append(table.img);
     }
 }
 
@@ -506,6 +574,26 @@ function deplacer(x: number, y: number): void {
         positionJoueur[0] += x;
         positionJoueur[1] += y;
         placerJoueur();
+        if (map[positionJoueur[0]][positionJoueur[1]] == 'F') {
+            if (degatInt == -1) {
+                const degatSound = new Audio("../sounds/degat.mp3");
+                degatSound.play();
+                kratos.pv -= 1;
+                mettreAJoursInventaire();
+                degatInt = setInterval(function() {
+                    degatSound.play();
+                    kratos.pv -= 1;
+                    mettreAJoursInventaire();
+                }, 1500);
+
+            }
+        }
+        else {
+            if (!(degatInt == -1)){
+                clearInterval(degatInt);
+                degatInt = -1;
+            }
+        }
     }
     if (checkIfMonsterAround()) {
         window.removeEventListener('keydown', whichKey);
@@ -524,6 +612,13 @@ function deplacer(x: number, y: number): void {
         const doorActuel = tabPortes[idDoorActuel];
         doorActuel.img.addEventListener('click', openDoor);
     }
+
+    else if (checkIfCraftTable()) {
+        indications.textContent = "3 or pour créer une hache, cliquez sur la table de craft pour l'acheter";
+        console.log("3 or pour créer une hache, cliquez sur la table de craft pour l'acheter");
+        const craftActuel = tabCraft[idCraftActuel];
+        craftActuel.img.addEventListener('click', craftGun);
+    }
 }
 
 function openDoor() {
@@ -532,7 +627,6 @@ function openDoor() {
         const doorSound = new Audio("../sounds/doorOpen.mp3");
         doorSound.play();
         doorToOpen.open();
-        doorToOpen.img.remove();
         kratos.or -= 2;
         indications.textContent = 'Ouverture de la porte. -2 or...';
         console.log('Ouverture de la porte. -2 or...');
@@ -555,8 +649,20 @@ function openChest() {
     const chestSound = new Audio("../sounds/chestOpen.mp3");
     chestSound.play();
     kratos.openChest(tabCoffres[idChestActuel]);
-    tabCoffres[idChestActuel].img.remove();
     mettreAJoursInventaire();
+}
+
+function craftGun() {
+    if (kratos.cuir >= 3 && !kratos.hasAxe) {
+        const craftingSound = new Audio("../sounds/crafting.mp3");
+        craftingSound.play();
+        tabCraft[idCraftActuel].getAxe();
+        const hacheAffichage = document.createElement('img');
+        hacheAffichage.src = '../img/axe.png';
+        inventaire.append(hacheAffichage);
+        indications.textContent = "Felicitation, vous avez fabriqué une hache! Elle vous apportera +3 en degats! Cela vous a couté 3 or.";
+        console.log("Felicitation, vous avez fabriqué une hache! Elle vous apportera +3 en degats! Cela vous a couté 3 or.");
+    }
 }
 
 async function delay(ms: number): Promise<void> {
@@ -664,6 +770,12 @@ function checkIfCoffre(): boolean {
 function checkIfDoor(): boolean {
     return checkIfObjectAround('door', (id) => {
         idDoorActuel = id;
+    });
+}
+
+function checkIfCraftTable(): boolean {
+    return checkIfObjectAround('craft', (id) => {
+        idCraftActuel = id;
     });
 }
 

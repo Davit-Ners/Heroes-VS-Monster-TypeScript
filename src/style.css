@@ -47,6 +47,11 @@ header {
     justify-content: space-around;
     border: 2px solid black;
     padding: 2em;
+
+    img {
+        object-fit: contain;
+        width: 50px;
+    }
 }
 
 .pv {
@@ -111,6 +116,10 @@ header {
 
 .sol {
     background-color: rgb(159, 157, 155);
+}
+
+.feu {
+    background-color: rgb(195, 24, 24);
 }
 
 main {
