@@ -458,13 +458,18 @@ function deplacer(x, y) {
         if (map[positionJoueur[0]][positionJoueur[1]] == 'F') {
             if (degatInt == -1) {
                 const degatSound = new Audio("../sounds/degat.mp3");
+                const oofSound = new Audio("../sounds/oof.mp3");
                 degatSound.play();
                 kratos.pv -= 1;
                 mettreAJoursInventaire();
                 degatInt = setInterval(function () {
                     degatSound.play();
+                    oofSound.play();
                     kratos.pv -= 1;
                     mettreAJoursInventaire();
+                    if (!kratos.isAlive) {
+                        gameOver = true;
+                    }
                 }, 1500);
             }
         }
