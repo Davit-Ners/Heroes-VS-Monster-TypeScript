@@ -348,6 +348,7 @@ const pvMonster = document.querySelector('.pvMonster');
 const affichePvMonster = document.getElementById('pvMonster');
 const indications = document.getElementById('indications');
 let degatInt = -1;
+let lettreAleatoire;
 // Fonctions du jeu
 const map = [
     ['#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '-', '#', '#', '#', '#', '#'],
@@ -482,7 +483,7 @@ function deplacer(x, y) {
     }
     if (checkIfMonsterAround()) {
         window.removeEventListener('keydown', whichKey);
-        combat(kratos, tabMonstres[idAdversaireActuel]);
+        combatV2(kratos, tabMonstres[idAdversaireActuel]);
     }
     else if (checkIfCoffre()) {
         indications.textContent = "Cliquez sur le coffre pour l'ouvrir";
@@ -608,6 +609,95 @@ async function combat(hero, monstre) {
     music.pause();
     music.currentTime = 0; // Réinitialiser à zéro
     pvMonster.style.visibility = 'hidden';
+}
+async function combatV2(hero, monstre) {
+    pvMonster.style.visibility = 'visible';
+    affichePvMonster.textContent = `PV du monstre : ${monstre.pv} PV`;
+    indications.textContent = "Le combat entre vous et le monstre commence !";
+    console.log("Le combat entre vous et le monstre commence !");
+    const combatSound = new Audio("../sounds/fight.mp3");
+    combatSound.play();
+    await delay(1000);
+    const music = new Audio("../sounds/musicBattle.mp3");
+    music.loop = true;
+    music.play();
+    while (hero.isAlive && monstre.isAlive) {
+        const alphabet = getAlphabet();
+        const lettreAleatoire = toucheAleatoire(alphabet);
+        indications.textContent = `Appuyez sur la lettre : ${lettreAleatoire}`;
+        const result = await attendreToucheAvecTimeout(lettreAleatoire, 1000);
+        if (result) {
+            const punchSound = new Audio("../sounds/punch.mp3");
+            punchSound.play();
+            indications.textContent = "Bien joué ! Vous attaquez le monstre.";
+            hero.attaque(monstre);
+            affichePvMonster.textContent = `PV du monstre : ${monstre.pv} PV`;
+        }
+        else {
+            const swordSound = new Audio("../sounds/sword.mp3");
+            swordSound.play();
+            indications.textContent = "Vous avez raté ! Le monstre riposte.";
+            monstre.attaque(hero);
+        }
+        mettreAJoursInventaire();
+        if (!monstre.isAlive) {
+            kratos.loot(monstre);
+            const roarSound = new Audio("../sounds/monsterRoar.mp3");
+            roarSound.play();
+            monstre.img.remove();
+            hero.repos();
+            indications.textContent = "Vous avez vaincu le monstre !";
+            window.addEventListener('keydown', whichKey);
+            mettreAJoursInventaire();
+        }
+        if (!hero.isAlive) {
+            const looseSound = new Audio("../sounds/loose.mp3");
+            looseSound.play();
+            indications.textContent = "Vous êtes mort. Le combat est terminé.";
+        }
+    }
+    music.pause();
+    music.currentTime = 0;
+    pvMonster.style.visibility = 'hidden';
+}
+function attendreToucheAvecTimeout(lettreCible, timeout) {
+    return new Promise((resolve) => {
+        let isResolved = false;
+        function onKeyPress(e) {
+            if (isResolved)
+                return;
+            if (e.key === lettreCible) {
+                isResolved = true;
+                document.removeEventListener('keydown', onKeyPress);
+                resolve(true);
+            }
+        }
+        document.addEventListener('keydown', onKeyPress);
+        setTimeout(() => {
+            if (!isResolved) {
+                isResolved = true;
+                document.removeEventListener('keydown', onKeyPress);
+                resolve(false);
+            }
+        }, timeout);
+    });
+}
+function jeuTouche(e) {
+    if (e.key == lettreAleatoire) {
+        alert('OK');
+    }
+    alert('KO');
+}
+function toucheAleatoire(touche) {
+    const rand = Math.floor(Math.random() * 26);
+    return touche[rand];
+}
+function getAlphabet() {
+    const alphabet = [];
+    for (let i = 0; i < 26; i++) {
+        alphabet.push(String.fromCharCode(97 + i));
+    }
+    return alphabet;
 }
 function checkIfObjectAround(className, callback) {
     const voisins = [
