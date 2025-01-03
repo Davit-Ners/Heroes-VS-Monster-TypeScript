@@ -608,13 +608,48 @@ async function delay(ms) {
 //     music.currentTime = 0; // Réinitialiser à zéro
 //     pvMonster.style.visibility = 'hidden';
 // }
-async function combatV2(hero, monstre) {
+function checkIfDead(hero, monstre) {
+    if (!monstre.isAlive) {
+        kratos.loot(monstre);
+        const roarSound = new Audio("../sounds/monsterRoar.mp3");
+        roarSound.play();
+        monstre.img.remove();
+        hero.repos();
+        indications.textContent = "Vous avez vaincu le monstre !";
+        window.addEventListener('keydown', whichKey);
+        mettreAJoursInventaire();
+    }
+    if (!hero.isAlive) {
+        const looseSound = new Audio("../sounds/loose.mp3");
+        looseSound.play();
+        indications.textContent = "Vous êtes mort. Le combat est terminé.";
+    }
+}
+function attaqueCombat(result, hero, monstre) {
+    if (result) {
+        const punchSound = new Audio("../sounds/punch.mp3");
+        punchSound.play();
+        indications.textContent = "Bien joué ! Vous attaquez le monstre.";
+        hero.attaque(monstre);
+        affichePvMonster.textContent = `PV du monstre : ${monstre.pv} PV`;
+    }
+    else {
+        const swordSound = new Audio("../sounds/sword.mp3");
+        swordSound.play();
+        indications.textContent = "Vous avez raté ! Le monstre riposte.";
+        monstre.attaque(hero);
+    }
+}
+function setupCombat(monstre) {
     pvMonster.style.visibility = 'visible';
     affichePvMonster.textContent = `PV du monstre : ${monstre.pv} PV`;
     indications.textContent = "Le combat entre vous et le monstre commence !";
     console.log("Le combat entre vous et le monstre commence !");
     const combatSound = new Audio("../sounds/fight.mp3");
     combatSound.play();
+}
+async function combatV2(hero, monstre) {
+    setupCombat(monstre);
     await delay(1000);
     const music = new Audio("../sounds/musicBattle.mp3");
     music.loop = true;
@@ -624,35 +659,9 @@ async function combatV2(hero, monstre) {
         const lettreAleatoire = toucheAleatoire(alphabet);
         indications.textContent = `Appuyez sur la lettre : ${lettreAleatoire}`;
         const result = await attendreToucheAvecTimeout(lettreAleatoire, 1000);
-        if (result) {
-            const punchSound = new Audio("../sounds/punch.mp3");
-            punchSound.play();
-            indications.textContent = "Bien joué ! Vous attaquez le monstre.";
-            hero.attaque(monstre);
-            affichePvMonster.textContent = `PV du monstre : ${monstre.pv} PV`;
-        }
-        else {
-            const swordSound = new Audio("../sounds/sword.mp3");
-            swordSound.play();
-            indications.textContent = "Vous avez raté ! Le monstre riposte.";
-            monstre.attaque(hero);
-        }
+        attaqueCombat(result, hero, monstre);
         mettreAJoursInventaire();
-        if (!monstre.isAlive) {
-            kratos.loot(monstre);
-            const roarSound = new Audio("../sounds/monsterRoar.mp3");
-            roarSound.play();
-            monstre.img.remove();
-            hero.repos();
-            indications.textContent = "Vous avez vaincu le monstre !";
-            window.addEventListener('keydown', whichKey);
-            mettreAJoursInventaire();
-        }
-        if (!hero.isAlive) {
-            const looseSound = new Audio("../sounds/loose.mp3");
-            looseSound.play();
-            indications.textContent = "Vous êtes mort. Le combat est terminé.";
-        }
+        checkIfDead(hero, monstre);
     }
     music.pause();
     music.currentTime = 0;
