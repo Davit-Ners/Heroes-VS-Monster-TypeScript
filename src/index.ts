@@ -491,6 +491,18 @@ const map: string[][] = [
     ['#', '#', '#', '.', '.', '.', '-', '.', '#', '-', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#'],
     ['#', '#', '#', '.', '.', '.', '-', '.', '#', '-', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#'],
   ];
+
+function generateGameObjects(): void {
+    const tabGameObject: GameObject[][] = [tabCoffres, tabPortes, tabCraft];
+    for (const tab of tabGameObject) {
+        for (const obj of tab) {
+            document.getElementById(`${obj.position[0]}-${obj.position[1]}`)!.append(obj.img);
+        }
+    }
+    for (const monster of tabMonstres) {
+        document.getElementById(`${monster.position[0]}-${monster.position[1]}`)!.append(monster.img);
+    }
+}
   
 function generateMap(): void {
     let i: number = 0;
@@ -526,21 +538,7 @@ function generateMap(): void {
         j = 0;
     }
 
-    for (const coffre of tabCoffres) {
-        document.getElementById(`${coffre.position[0]}-${coffre.position[1]}`)!.append(coffre.img);
-    }
-
-    for (const door of tabPortes) {
-        document.getElementById(`${door.position[0]}-${door.position[1]}`)!.append(door.img);
-    }
-
-    for (const monster of tabMonstres) {
-        document.getElementById(`${monster.position[0]}-${monster.position[1]}`)!.append(monster.img);
-    }
-
-    for (const table of tabCraft) {
-        document.getElementById(`${table.position[0]}-${table.position[1]}`)!.append(table.img);
-    }
+    generateGameObjects();
 }
 
 function placerJoueur(): void {
@@ -567,40 +565,35 @@ function notOutOfMap(x: number, y: number): boolean {
            positionJoueur[1] + y <= 27
 }
 
-function deplacer(x: number, y: number): void {
-    indications.textContent = "";
-    tabPortes[idDoorActuel]?.img?.removeEventListener('click', openDoor);
-    tabCoffres[idChestActuel]?.img?.removeEventListener('click', openChest);
-    if (notOutOfMap(x, y) && map[positionJoueur[0] + x][positionJoueur[1] + y] != '#' && document.getElementById(`${positionJoueur[0] + x}-${positionJoueur[1] + y}`)?.childNodes.length == 0) {
-        positionJoueur[0] += x;
-        positionJoueur[1] += y;
-        placerJoueur();
-        if (map[positionJoueur[0]][positionJoueur[1]] == 'F') {
-            if (degatInt == -1) {
-                const degatSound = new Audio("../sounds/degat.mp3");
-                const oofSound = new Audio("../sounds/oof.mp3");
+function degatsFeu(): void {
+    if (map[positionJoueur[0]][positionJoueur[1]] == 'F') {
+        if (degatInt == -1) {
+            const degatSound = new Audio("../sounds/degat.mp3");
+            const oofSound = new Audio("../sounds/oof.mp3");
+            degatSound.play();
+            kratos.pv -= 1;
+            mettreAJoursInventaire();
+            degatInt = setInterval(function() {
                 degatSound.play();
+                oofSound.play();
                 kratos.pv -= 1;
                 mettreAJoursInventaire();
-                degatInt = setInterval(function() {
-                    degatSound.play();
-                    oofSound.play();
-                    kratos.pv -= 1;
-                    mettreAJoursInventaire();
-                    if (!kratos.isAlive) {
-                        gameOver = true;
-                    }
-                }, 1500);
+                if (!kratos.isAlive) {
+                    gameOver = true;
+                }
+            }, 1500);
 
-            }
-        }
-        else {
-            if (!(degatInt == -1)){
-                clearInterval(degatInt);
-                degatInt = -1;
-            }
         }
     }
+    else {
+        if (!(degatInt == -1)){
+            clearInterval(degatInt);
+            degatInt = -1;
+        }
+    }
+}
+
+function checkIfSomethingAround(): void {
     if (checkIfMonsterAround()) {
         window.removeEventListener('keydown', whichKey);
         combatV2(kratos, tabMonstres[idAdversaireActuel]);
@@ -627,6 +620,19 @@ function deplacer(x: number, y: number): void {
     }
 }
 
+function deplacer(x: number, y: number): void {
+    indications.textContent = "";
+    tabPortes[idDoorActuel]?.img?.removeEventListener('click', openDoor);
+    tabCoffres[idChestActuel]?.img?.removeEventListener('click', openChest);
+    if (notOutOfMap(x, y) && map[positionJoueur[0] + x][positionJoueur[1] + y] != '#' && document.getElementById(`${positionJoueur[0] + x}-${positionJoueur[1] + y}`)?.childNodes.length == 0) {
+        positionJoueur[0] += x;
+        positionJoueur[1] += y;
+        placerJoueur();
+        degatsFeu();
+    }
+    checkIfSomethingAround();
+}
+
 function openDoor() {
     const doorToOpen = tabPortes[idDoorActuel];
     if (kratos.or >= 2) {
@@ -637,16 +643,10 @@ function openDoor() {
         indications.textContent = 'Ouverture de la porte. -2 or...';
         console.log('Ouverture de la porte. -2 or...');
         mettreAJoursInventaire();
-        setTimeout(function() {
-            indications.textContent = "";
-        }, 2000);
     }
     else {
         indications.textContent = "Vous n'avez pas assez d'or...";
         mettreAJoursInventaire();
-        setTimeout(function() {
-            indications.textContent = "";
-        }, 2000);
         console.log("Vous n'avez pas assez d'or...")
     };
 }
@@ -666,8 +666,8 @@ function craftGun() {
         const hacheAffichage = document.createElement('img');
         hacheAffichage.src = '../img/axe.png';
         inventaire.append(hacheAffichage);
-        indications.textContent = "Felicitation, vous avez fabriqué une hache! Elle vous apportera +3 en degats! Cela vous a couté 3 or.";
-        console.log("Felicitation, vous avez fabriqué une hache! Elle vous apportera +3 en degats! Cela vous a couté 3 or.");
+        indications.textContent = "Felicitation, vous avez fabriqué une hache! Elle vous apportera +3 en degats! Cela vous a couté 3 cuir.";
+        console.log("Felicitation, vous avez fabriqué une hache! Elle vous apportera +3 en degats! Cela vous a couté 3 cuir.");
     }
 }
 
@@ -675,72 +675,72 @@ async function delay(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-async function combat(hero: Human, monstre: Monstre): Promise<void> {
-    pvMonster.style.visibility = 'visible';
-    affichePvMonster.textContent = `PV du monstre : ${monstre.pv} PV`;
-    indications.textContent = "Le combat entre vous et le monstre commence !";
-    console.log("Le combat entre vous et le monstre commence !");
-    const combatSound = new Audio("../sounds/fight.mp3");
-    combatSound.play();
-    await delay(1000);
-    const music = new Audio("../sounds/musicBattle.mp3");
-    music.loop = true;
-    music.play();
+// async function combat(hero: Human, monstre: Monstre): Promise<void> {
+//     pvMonster.style.visibility = 'visible';
+//     affichePvMonster.textContent = `PV du monstre : ${monstre.pv} PV`;
+//     indications.textContent = "Le combat entre vous et le monstre commence !";
+//     console.log("Le combat entre vous et le monstre commence !");
+//     const combatSound = new Audio("../sounds/fight.mp3");
+//     combatSound.play();
+//     await delay(1000);
+//     const music = new Audio("../sounds/musicBattle.mp3");
+//     music.loop = true;
+//     music.play();
     
-    while (hero.isAlive && monstre.isAlive) {
-        const pvMonstre = monstre.pv;
-        hero.attaque(monstre);
-        const punchSound = new Audio("../sounds/punch.mp3");
-        punchSound.play();
+//     while (hero.isAlive && monstre.isAlive) {
+//         const pvMonstre = monstre.pv;
+//         hero.attaque(monstre);
+//         const punchSound = new Audio("../sounds/punch.mp3");
+//         punchSound.play();
 
-        if (!monstre.isAlive) {
-            indications.textContent = "Après cette attaque, vous avez vaincu le monstre !";
-            console.log("Après cette attaque, vous avez vaincu le monstre !");
-            kratos.loot(monstre);
-            const roarSound = new Audio("../sounds/monsterRoar.mp3");
-            roarSound.play(); 
-            monstre.img.remove();
-            hero.repos();
-            window.addEventListener('keydown', whichKey);
-            mettreAJoursInventaire()
-            setTimeout(function() {
-                indications.textContent = "";
-            }, 1000);
-            break;
-        } else {
-            indications.textContent = `Vous avez infligé ${pvMonstre - monstre.pv} de dégat au monstre, il ne lui reste plus que ${monstre.pv} pv !`;
-            console.log(`Vous avez infligé ${pvMonstre - monstre.pv} de dégat au monstre, il ne lui reste plus que ${monstre.pv} pv !`);
-            affichePvMonster.textContent = `PV du monstre : ${monstre.pv} PV`;
-        }
+//         if (!monstre.isAlive) {
+//             indications.textContent = "Après cette attaque, vous avez vaincu le monstre !";
+//             console.log("Après cette attaque, vous avez vaincu le monstre !");
+//             kratos.loot(monstre);
+//             const roarSound = new Audio("../sounds/monsterRoar.mp3");
+//             roarSound.play(); 
+//             monstre.img.remove();
+//             hero.repos();
+//             window.addEventListener('keydown', whichKey);
+//             mettreAJoursInventaire()
+//             setTimeout(function() {
+//                 indications.textContent = "";
+//             }, 1000);
+//             break;
+//         } else {
+//             indications.textContent = `Vous avez infligé ${pvMonstre - monstre.pv} de dégat au monstre, il ne lui reste plus que ${monstre.pv} pv !`;
+//             console.log(`Vous avez infligé ${pvMonstre - monstre.pv} de dégat au monstre, il ne lui reste plus que ${monstre.pv} pv !`);
+//             affichePvMonster.textContent = `PV du monstre : ${monstre.pv} PV`;
+//         }
 
-        await delay(1000);
+//         await delay(1000);
 
-        if (monstre.isAlive) {
-            const pvHero = hero.pv;
-            monstre.attaque(hero);
-            mettreAJoursInventaire();
-            const swordSound = new Audio("../sounds/sword.mp3");
-            swordSound.play();
-            if (!hero.isAlive) {
-                indications.textContent = "Après cette attaque du monstre, vous êtes mort !";
-                console.log("Après cette attaque du monstre, vous êtes mort !");
-                const looseSound = new Audio("../sounds/loose.mp3");
-                looseSound.play();
-                gameOver = true;
-                break;
-            } else {
-                indications.textContent = `Le monstre vous a infligé ${pvHero - hero.pv} de dégat, il ne vous reste plus que ${hero.pv} pv !`;
-                console.log(`Le monstre vous a infligé ${pvHero - hero.pv} de dégat, il ne vous reste plus que ${hero.pv} pv !`);
-            }
-        }
+//         if (monstre.isAlive) {
+//             const pvHero = hero.pv;
+//             monstre.attaque(hero);
+//             mettreAJoursInventaire();
+//             const swordSound = new Audio("../sounds/sword.mp3");
+//             swordSound.play();
+//             if (!hero.isAlive) {
+//                 indications.textContent = "Après cette attaque du monstre, vous êtes mort !";
+//                 console.log("Après cette attaque du monstre, vous êtes mort !");
+//                 const looseSound = new Audio("../sounds/loose.mp3");
+//                 looseSound.play();
+//                 gameOver = true;
+//                 break;
+//             } else {
+//                 indications.textContent = `Le monstre vous a infligé ${pvHero - hero.pv} de dégat, il ne vous reste plus que ${hero.pv} pv !`;
+//                 console.log(`Le monstre vous a infligé ${pvHero - hero.pv} de dégat, il ne vous reste plus que ${hero.pv} pv !`);
+//             }
+//         }
 
-        await delay(1000);
-    }
+//         await delay(1000);
+//     }
 
-    music.pause();
-    music.currentTime = 0; // Réinitialiser à zéro
-    pvMonster.style.visibility = 'hidden';
-}
+//     music.pause();
+//     music.currentTime = 0; // Réinitialiser à zéro
+//     pvMonster.style.visibility = 'hidden';
+// }
 
 async function combatV2(hero: Human, monstre: Monstre): Promise<void> {
     pvMonster.style.visibility = 'visible';
