@@ -350,6 +350,7 @@ const indications = document.getElementById('indications');
 let degatInt = -1;
 let lettreAleatoire;
 // Fonctions du jeu
+// Ceci est la fonction pour generer la carte du jeu en tableau de string
 const map = [
     ['#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '-', '#', '#', '#', '#', '#'],
     ['#', '#', '.', '.', '.', '#', '-', '.', '.', '.', '-', '#', '.', '.', '.', '.', '.', '.', '#', '#', '-', '.', '.', '.', '-', '#', '#', '#'],
@@ -380,6 +381,7 @@ const map = [
     ['#', '#', '#', '.', '.', '.', '-', '.', '#', '-', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#'],
     ['#', '#', '#', '.', '.', '.', '-', '.', '#', '-', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#'],
 ];
+// Fonction pour generer les object du jeu (portes, coffres, ...) et les faires apparaitre dans le DOM
 function generateGameObjects() {
     const tabGameObject = [tabCoffres, tabPortes, tabCraft];
     for (const tab of tabGameObject) {
@@ -391,6 +393,7 @@ function generateGameObjects() {
         document.getElementById(`${monster.position[0]}-${monster.position[1]}`).append(monster.img);
     }
 }
+// Fonction pour ajouter la carte au DOM
 function generateMap() {
     let i = 0;
     let j = 0;
@@ -424,9 +427,11 @@ function generateMap() {
     }
     generateGameObjects();
 }
+// Fonction pour placer et ajouter le hero au DOM
 function placerJoueur() {
     document.getElementById(`${positionJoueur[0]}-${positionJoueur[1]}`).append(kratos.img);
 }
+// Fonction pour detecter si les fleches sont pressés pour le deplacement
 function whichKey(event) {
     event.preventDefault();
     if (event.key === "ArrowUp") {
@@ -442,12 +447,14 @@ function whichKey(event) {
         deplacer(0, 1);
     }
 }
+// Fonction pour checker qu'on ne depasse pas les limites de la map
 function notOutOfMap(x, y) {
     return positionJoueur[0] + x >= 0 &&
         positionJoueur[0] + x <= 27 &&
         positionJoueur[1] + y >= 0 &&
         positionJoueur[1] + y <= 27;
 }
+// Fonction pour rajotuer des degats au hero si on va dans le feu
 function degatsFeu() {
     if (map[positionJoueur[0]][positionJoueur[1]] == 'F') {
         if (degatInt == -1) {
@@ -474,6 +481,7 @@ function degatsFeu() {
         }
     }
 }
+// Fonction pour checker si un entitée ou objet se trouve autour du joueur
 function checkIfSomethingAround() {
     if (checkIfMonsterAround()) {
         window.removeEventListener('keydown', whichKey);
@@ -497,6 +505,7 @@ function checkIfSomethingAround() {
         craftActuel.img.addEventListener('click', craftGun);
     }
 }
+// Fonction pour gerer le deplacement du joueur
 function deplacer(x, y) {
     indications.textContent = "";
     tabPortes[idDoorActuel]?.img?.removeEventListener('click', openDoor);
@@ -509,6 +518,7 @@ function deplacer(x, y) {
     }
     checkIfSomethingAround();
 }
+// Fonction pour ouvrir une porte
 function openDoor() {
     const doorToOpen = tabPortes[idDoorActuel];
     if (kratos.or >= 2) {
@@ -527,12 +537,14 @@ function openDoor() {
     }
     ;
 }
+// Fonction pour ouvrir un coffre
 function openChest() {
     const chestSound = new Audio("../sounds/chestOpen.mp3");
     chestSound.play();
     kratos.openChest(tabCoffres[idChestActuel]);
     mettreAJoursInventaire();
 }
+// Fonction pour creer une arme
 function craftGun() {
     if (kratos.cuir >= 3 && !kratos.hasAxe) {
         const craftingSound = new Audio("../sounds/crafting.mp3");
@@ -545,9 +557,11 @@ function craftGun() {
         console.log("Felicitation, vous avez fabriqué une hache! Elle vous apportera +3 en degats! Cela vous a couté 3 cuir.");
     }
 }
+// Fonction Promesse pour pouvoir creer un delay dans une fonction Async
 async function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
+//! Ancienne fonction de combat, basé sur du tour par tour sans interactivité avec le joueur
 // async function combat(hero: Human, monstre: Monstre): Promise<void> {
 //     pvMonster.style.visibility = 'visible';
 //     affichePvMonster.textContent = `PV du monstre : ${monstre.pv} PV`;
@@ -608,6 +622,7 @@ async function delay(ms) {
 //     music.currentTime = 0; // Réinitialiser à zéro
 //     pvMonster.style.visibility = 'hidden';
 // }
+// Fonction pour checker si le hero ou le monstre est mort entre les attaques du combat
 function checkIfDead(hero, monstre) {
     if (!monstre.isAlive) {
         kratos.loot(monstre);
@@ -625,6 +640,7 @@ function checkIfDead(hero, monstre) {
         indications.textContent = "Vous êtes mort. Le combat est terminé.";
     }
 }
+// Fonction pour gerer l'attaque du joueur ou du monstre dependant de si le joueur reussi le QTE
 function attaqueCombat(result, hero, monstre) {
     if (result) {
         const punchSound = new Audio("../sounds/punch.mp3");
@@ -640,6 +656,7 @@ function attaqueCombat(result, hero, monstre) {
         monstre.attaque(hero);
     }
 }
+// Set up d'elements du DOM pour un combat
 function setupCombat(monstre) {
     pvMonster.style.visibility = 'visible';
     affichePvMonster.textContent = `PV du monstre : ${monstre.pv} PV`;
@@ -648,6 +665,7 @@ function setupCombat(monstre) {
     const combatSound = new Audio("../sounds/fight.mp3");
     combatSound.play();
 }
+//! Vrai fonction de combat basé sur un QTE pour le joueur
 async function combatV2(hero, monstre) {
     setupCombat(monstre);
     await delay(1000);
@@ -667,6 +685,7 @@ async function combatV2(hero, monstre) {
     music.currentTime = 0;
     pvMonster.style.visibility = 'hidden';
 }
+// Fonction Promesse qui attend un temps imparti pour une entrée du joueur pour le QTE
 function attendreToucheAvecTimeout(lettreCible, timeout) {
     return new Promise((resolve) => {
         let isResolved = false;
@@ -689,16 +708,19 @@ function attendreToucheAvecTimeout(lettreCible, timeout) {
         }, timeout);
     });
 }
+// Fonction pour checker si la bonne lettre est entrée par le joueur lors du QTE
 function jeuTouche(e) {
     if (e.key == lettreAleatoire) {
         alert('OK');
     }
     alert('KO');
 }
+// Fonction qui va generer une lettre aléatoire pour le QTE lors d'un combat
 function toucheAleatoire(touche) {
     const rand = Math.floor(Math.random() * 26);
     return touche[rand];
 }
+// Fonction pour generer un tableau avec les lettres de l'alphabet
 function getAlphabet() {
     const alphabet = [];
     for (let i = 0; i < 26; i++) {
@@ -706,6 +728,7 @@ function getAlphabet() {
     }
     return alphabet;
 }
+// Fonction generale pour voir si un object se trouve autour du joueur
 function checkIfObjectAround(className, callback) {
     const voisins = [
         [0, 1], [1, 1], [1, 0], [0, -1],
@@ -723,6 +746,7 @@ function checkIfObjectAround(className, callback) {
     }
     return false;
 }
+// Application de la fonctoin general a chaque object ou entité du jeu
 function checkIfMonsterAround() {
     return checkIfObjectAround('monster', (id) => {
         idAdversaireActuel = id;
@@ -743,6 +767,7 @@ function checkIfCraftTable() {
         idCraftActuel = id;
     });
 }
+// Fonction pour remmetre a jours l'affichage de l'inventaire du joueur et de ses PV entre chaque action pouvant les changer
 function mettreAJoursInventaire() {
     orJoueur.textContent = `Or : ${kratos.or}`;
     cuirJoueur.textContent = `Cuir : ${kratos.cuir}`;
