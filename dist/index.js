@@ -555,6 +555,7 @@ function craftGun() {
         inventaire.append(hacheAffichage);
         indications.textContent = "Felicitation, vous avez fabriqué une hache! Elle vous apportera +3 en degats! Cela vous a couté 3 cuir.";
         console.log("Felicitation, vous avez fabriqué une hache! Elle vous apportera +3 en degats! Cela vous a couté 3 cuir.");
+        mettreAJoursInventaire();
     }
 }
 // Fonction Promesse pour pouvoir creer un delay dans une fonction Async
