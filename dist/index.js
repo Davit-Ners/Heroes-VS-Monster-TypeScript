@@ -346,6 +346,8 @@ inventaire.append(orJoueur, cuirJoueur);
 mettreAJoursInventaire();
 const pvMonster = document.querySelector('.pvMonster');
 const affichePvMonster = document.getElementById('pvMonster');
+const progressHero = document.querySelector('.progressHero');
+const progressMonster = document.querySelector('.progressMonster');
 const indications = document.getElementById('indications');
 let degatInt = -1;
 let lettreAleatoire;
@@ -353,6 +355,8 @@ const heroZone = document.querySelector('.heroZone');
 const monsterZone = document.querySelector('.monsterZone');
 const combatZone = document.querySelector('.combat-zone');
 const fightInstr = document.querySelector('#fightInstr');
+const crossHero = document.getElementById('crossHero');
+const crossMonster = document.getElementById('crossMonster');
 // Fonctions du jeu
 // Ceci est la fonction pour generer la carte du jeu en tableau de string
 const map = [
@@ -566,6 +570,18 @@ function craftGun() {
 async function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
+function resetDOM(hero, monstre) {
+    pvMonster.style.visibility = 'hidden';
+    combatZone.style.display = 'none';
+    crossMonster.style.display = 'none';
+    placerJoueur();
+    monstre.img.remove();
+    hero.repos();
+    indications.textContent = "Vous avez vaincu le monstre !";
+    window.addEventListener('keydown', whichKey);
+    mettreAJoursInventaire();
+    progressMonster.style.setProperty('--progressMonster', `100%`);
+}
 //! Ancienne fonction de combat, basé sur du tour par tour sans interactivité avec le joueur
 // async function combat(hero: Human, monstre: Monstre): Promise<void> {
 //     pvMonster.style.visibility = 'visible';
@@ -628,20 +644,19 @@ async function delay(ms) {
 //     pvMonster.style.visibility = 'hidden';
 // }
 // Fonction pour checker si le hero ou le monstre est mort entre les attaques du combat
-function checkIfDead(hero, monstre) {
+async function checkIfDead(hero, monstre) {
     if (!monstre.isAlive) {
         kratos.loot(monstre);
         const roarSound = new Audio("../sounds/monsterRoar.mp3");
         roarSound.play();
-        monstre.img.remove();
-        hero.repos();
-        indications.textContent = "Vous avez vaincu le monstre !";
-        window.addEventListener('keydown', whichKey);
-        mettreAJoursInventaire();
+        crossMonster.style.display = 'block';
+        await delay(2000);
+        resetDOM(hero, monstre);
     }
     if (!hero.isAlive) {
         const looseSound = new Audio("../sounds/loose.mp3");
         looseSound.play();
+        crossHero.style.display = 'block';
         indications.textContent = "Vous êtes mort. Le combat est terminé.";
     }
 }
@@ -652,6 +667,7 @@ function attaqueCombat(result, hero, monstre) {
         punchSound.play();
         indications.textContent = "Bien joué ! Vous attaquez le monstre.";
         hero.attaque(monstre);
+        progressMonster.style.setProperty('--progressMonster', `${pvIntoPercent(monstre)}%`);
         affichePvMonster.textContent = `PV du monstre : ${monstre.pv} PV`;
     }
     else {
@@ -659,6 +675,7 @@ function attaqueCombat(result, hero, monstre) {
         swordSound.play();
         indications.textContent = "Vous avez raté ! Le monstre riposte.";
         monstre.attaque(hero);
+        progressHero.style.setProperty('--progressHero', `${pvIntoPercent(hero)}%`);
     }
 }
 // Set up d'elements du DOM pour un combat
@@ -667,11 +684,15 @@ function setupCombat(monstre) {
     affichePvMonster.textContent = `PV du monstre : ${monstre.pv} PV`;
     indications.textContent = "Le combat entre vous et le monstre commence !";
     console.log("Le combat entre vous et le monstre commence !");
+    //? Ajout ici
     combatZone.style.display = 'block';
-    heroZone.append(kratos.img);
-    monsterZone.append(wolf.img);
+    heroZone.prepend(kratos.img);
+    monsterZone.prepend(monstre.img);
     const combatSound = new Audio("../sounds/fight.mp3");
     combatSound.play();
+}
+function pvIntoPercent(personnage) {
+    return (personnage.pv / personnage.maxPv) * 100;
 }
 //! Vrai fonction de combat basé sur un QTE pour le joueur
 async function combatV2(hero, monstre) {
@@ -683,6 +704,7 @@ async function combatV2(hero, monstre) {
     while (hero.isAlive && monstre.isAlive) {
         const alphabet = getAlphabet();
         const lettreAleatoire = toucheAleatoire(alphabet);
+        //? Ajout ici
         fightInstr.textContent = `${lettreAleatoire}`;
         const result = await attendreToucheAvecTimeout(lettreAleatoire, 1000);
         attaqueCombat(result, hero, monstre);
@@ -691,9 +713,6 @@ async function combatV2(hero, monstre) {
     }
     music.pause();
     music.currentTime = 0;
-    pvMonster.style.visibility = 'hidden';
-    combatZone.style.display = 'none';
-    placerJoueur();
 }
 // Fonction Promesse qui attend un temps imparti pour une entrée du joueur pour le QTE
 function attendreToucheAvecTimeout(lettreCible, timeout) {
