@@ -458,6 +458,11 @@ const indications: HTMLParagraphElement = document.getElementById('indications')
 let degatInt: number = -1;
 let lettreAleatoire: string;
 
+const heroZone: HTMLDivElement = document.querySelector('.heroZone') as HTMLDivElement;
+const monsterZone: HTMLDivElement = document.querySelector('.monsterZone') as HTMLDivElement;
+const combatZone: HTMLDivElement = document.querySelector('.combat-zone') as HTMLDivElement;
+const fightInstr: HTMLParagraphElement = document.querySelector('#fightInstr') as HTMLParagraphElement;
+
 
 // Fonctions du jeu
 
@@ -758,6 +763,7 @@ async function delay(ms: number): Promise<void> {
 // }
 
 // Fonction pour checker si le hero ou le monstre est mort entre les attaques du combat
+
 function checkIfDead(hero: Human, monstre: Monstre): void {
     if (!monstre.isAlive) {
         kratos.loot(monstre);
@@ -798,6 +804,10 @@ function setupCombat(monstre: Monstre):void {
     affichePvMonster.textContent = `PV du monstre : ${monstre.pv} PV`;
     indications.textContent = "Le combat entre vous et le monstre commence !";
     console.log("Le combat entre vous et le monstre commence !");
+
+    combatZone.style.display = 'block';
+    heroZone.append(kratos.img)
+    monsterZone.append(wolf.img)
     
     const combatSound = new Audio("../sounds/fight.mp3");
     combatSound.play();
@@ -816,7 +826,7 @@ async function combatV2(hero: Human, monstre: Monstre): Promise<void> {
         const alphabet = getAlphabet();
         const lettreAleatoire = toucheAleatoire(alphabet);
 
-        indications.textContent = `Appuyez sur la lettre : ${lettreAleatoire}`;
+        fightInstr.textContent = `${lettreAleatoire}`;
 
         const result = await attendreToucheAvecTimeout(lettreAleatoire, 1000);
 
@@ -829,6 +839,8 @@ async function combatV2(hero: Human, monstre: Monstre): Promise<void> {
     music.pause();
     music.currentTime = 0;
     pvMonster.style.visibility = 'hidden';
+    combatZone.style.display = 'none';
+    placerJoueur();
 }
 
 // Fonction Promesse qui attend un temps imparti pour une entrée du joueur pour le QTE

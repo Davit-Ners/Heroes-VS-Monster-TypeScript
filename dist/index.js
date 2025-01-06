@@ -349,6 +349,10 @@ const affichePvMonster = document.getElementById('pvMonster');
 const indications = document.getElementById('indications');
 let degatInt = -1;
 let lettreAleatoire;
+const heroZone = document.querySelector('.heroZone');
+const monsterZone = document.querySelector('.monsterZone');
+const combatZone = document.querySelector('.combat-zone');
+const fightInstr = document.querySelector('#fightInstr');
 // Fonctions du jeu
 // Ceci est la fonction pour generer la carte du jeu en tableau de string
 const map = [
@@ -663,6 +667,9 @@ function setupCombat(monstre) {
     affichePvMonster.textContent = `PV du monstre : ${monstre.pv} PV`;
     indications.textContent = "Le combat entre vous et le monstre commence !";
     console.log("Le combat entre vous et le monstre commence !");
+    combatZone.style.display = 'block';
+    heroZone.append(kratos.img);
+    monsterZone.append(wolf.img);
     const combatSound = new Audio("../sounds/fight.mp3");
     combatSound.play();
 }
@@ -676,7 +683,7 @@ async function combatV2(hero, monstre) {
     while (hero.isAlive && monstre.isAlive) {
         const alphabet = getAlphabet();
         const lettreAleatoire = toucheAleatoire(alphabet);
-        indications.textContent = `Appuyez sur la lettre : ${lettreAleatoire}`;
+        fightInstr.textContent = `${lettreAleatoire}`;
         const result = await attendreToucheAvecTimeout(lettreAleatoire, 1000);
         attaqueCombat(result, hero, monstre);
         mettreAJoursInventaire();
@@ -685,6 +692,8 @@ async function combatV2(hero, monstre) {
     music.pause();
     music.currentTime = 0;
     pvMonster.style.visibility = 'hidden';
+    combatZone.style.display = 'none';
+    placerJoueur();
 }
 // Fonction Promesse qui attend un temps imparti pour une entrée du joueur pour le QTE
 function attendreToucheAvecTimeout(lettreCible, timeout) {
