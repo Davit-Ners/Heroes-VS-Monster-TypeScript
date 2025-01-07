@@ -928,7 +928,7 @@ function checkIfObjectAround(className: string, callback: (id: number) => void):
         if (element?.hasChildNodes()) {
             const img: HTMLImageElement = element.firstChild as HTMLImageElement;
             if (img.className === className) {
-                callback(Number(img.id[1]));
+                callback(Number(img.id.slice(1)));
                 return true;
             }
         }
