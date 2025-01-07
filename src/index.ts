@@ -829,7 +829,7 @@ function setupCombat(monstre: Monstre):void {
     combatZone.style.display = 'block';
     heroZone.prepend(kratos.img)
     monsterZone.prepend(monstre.img)
-    progressHero.style.setProperty('--progressHero', `${pvIntoPercent(kratos)}`);
+    progressHero.style.setProperty('--progressHero', `${pvIntoPercent(kratos)}%`);
     
     const combatSound = new Audio("../sounds/fight.mp3");
     combatSound.play();
