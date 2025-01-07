@@ -581,6 +581,8 @@ function resetDOM(hero, monstre) {
     window.addEventListener('keydown', whichKey);
     mettreAJoursInventaire();
     progressMonster.style.setProperty('--progressMonster', `100%`);
+    progressHero.style.setProperty('--progressHero', `100%`);
+    fightInstr.textContent = '';
 }
 //! Ancienne fonction de combat, basé sur du tour par tour sans interactivité avec le joueur
 // async function combat(hero: Human, monstre: Monstre): Promise<void> {
@@ -688,6 +690,7 @@ function setupCombat(monstre) {
     combatZone.style.display = 'block';
     heroZone.prepend(kratos.img);
     monsterZone.prepend(monstre.img);
+    progressHero.style.setProperty('--progressHero', `${pvIntoPercent(kratos)}`);
     const combatSound = new Audio("../sounds/fight.mp3");
     combatSound.play();
 }
