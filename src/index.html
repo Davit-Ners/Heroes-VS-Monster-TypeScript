@@ -10,12 +10,34 @@
     <body>
 
         <header>
-            <h1>Human VS Monsters</h1>
+            <h1>Heroes VS Monsters</h1>
         </header>
         
         <main>
             <div class="jeu">
                 <div class="map">
+                    <div class="intro">
+                        <h2>Bienvenue dans Heroes vs Monsters !</h2>
+                        <p>
+                            Dans ce jeu d'aventure palpitant, tu incarnes un héros courageux qui doit parcourir un monde mystérieux, plein de dangers et de créatures redoutables. 
+                            <br><br>Ta mission ? Tuer tous les monstres qui se dressent sur ton chemin et collecter des ressources pour avancer. Voici ce qui t'attend :
+                            
+                            <br><br>Déplace-toi avec les flèches directionnelles : Explore la carte et fais attention à la lave qui pourrait te blesser si tu ne l'évites pas !
+                            
+                            Affronte des monstres : Les combats se font sous forme de QTE (Quick Time Event). Sois rapide et précis pour vaincre tes ennemis et récolter des ressources.
+                            
+                            Ouvre des portes et récupère des trésors : Pour accéder à de nouvelles zones, tu devras ouvrir des portes. Cela te coûtera des ressources que tu peux gagner en tuant des monstres ou en ouvrant des coffres.
+                            
+                            Craft tes armes : Dans la table de craft, utilise les ressources que tu as collectées pour créer de puissantes armes qui t'aideront à combattre encore plus efficacement.
+                            
+                            Survis aux dangers : En plus des monstres, sois vigilant face à la lave qui peut te coûter cher en points de vie.
+                            
+                            <br><br>Prêt à relever le défi ? Prépare-toi à plonger dans cette aventure et à devenir le héros dont ce monde a besoin !
+                            
+                           <br> Bonne chance, héros !</p>
+        
+                            <button id="skipIntroBtn">Commencer le jeu</button>
+                    </div>
                     <div class="combat-zone">
                         <div class="combattants">
                             <div class="heroZone">
@@ -36,6 +58,11 @@
                             </div>
                         </div>
                     <p id="fightInstr"></p>
+                    <div class="timerFight">
+                        <div class="bar">
+                          <div class="progress-value"></div>
+                        </div>
+                      </div>
                 </div>
             </div>
                 <div class="elements-jeu">
@@ -62,7 +89,7 @@
                     <h2 id="titreModal">Titre</h2>
                 </div>
                 <div class="inventaireModal">
-                    <h3>Axe</h3>
+                    <img src="../img/axe.png" alt="">
                     <img src="../img/axe.png" alt="">
                 </div>
                 <div class="combatZone">

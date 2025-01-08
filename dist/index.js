@@ -357,6 +357,10 @@ const combatZone = document.querySelector('.combat-zone');
 const fightInstr = document.querySelector('#fightInstr');
 const crossHero = document.getElementById('crossHero');
 const crossMonster = document.getElementById('crossMonster');
+const introDiv = document.querySelector('.intro');
+const skipIntroBtn = document.getElementById('skipIntroBtn');
+const timerFight = document.querySelector('.timerFight');
+const timerFightProgress = timerFight.firstElementChild;
 // Fonctions du jeu
 // Ceci est la fonction pour generer la carte du jeu en tableau de string
 const map = [
@@ -582,6 +586,10 @@ function resetDOM(hero, monstre) {
     mettreAJoursInventaire();
     progressMonster.style.setProperty('--progressMonster', `100%`);
     progressHero.style.setProperty('--progressHero', `100%`);
+<<<<<<< HEAD
+=======
+    fightInstr.textContent = '';
+>>>>>>> f7b8dc309f1a74b45ab0a56396621400895a70d1
 }
 //! Ancienne fonction de combat, basé sur du tour par tour sans interactivité avec le joueur
 // async function combat(hero: Human, monstre: Monstre): Promise<void> {
@@ -651,6 +659,8 @@ async function checkIfDead(hero, monstre) {
         const roarSound = new Audio("../sounds/monsterRoar.mp3");
         roarSound.play();
         crossMonster.style.display = 'block';
+        timerFight.style.display = 'none';
+        fightInstr.textContent = 'Victoire';
         await delay(2000);
         resetDOM(hero, monstre);
     }
@@ -658,7 +668,8 @@ async function checkIfDead(hero, monstre) {
         const looseSound = new Audio("../sounds/loose.mp3");
         looseSound.play();
         crossHero.style.display = 'block';
-        indications.textContent = "Vous êtes mort. Le combat est terminé.";
+        fightInstr.textContent = 'Perdu';
+        timerFight.style.display = 'none';
     }
 }
 // Fonction pour gerer l'attaque du joueur ou du monstre dependant de si le joueur reussi le QTE
@@ -685,10 +696,12 @@ function setupCombat(monstre) {
     affichePvMonster.textContent = `PV du monstre : ${monstre.pv} PV`;
     indications.textContent = "Le combat entre vous et le monstre commence !";
     console.log("Le combat entre vous et le monstre commence !");
+    fightInstr.textContent = 'READY?';
     //? Ajout ici
     combatZone.style.display = 'block';
     heroZone.prepend(kratos.img);
     monsterZone.prepend(monstre.img);
+    progressHero.style.setProperty('--progressHero', `${pvIntoPercent(kratos)}%`);
     const combatSound = new Audio("../sounds/fight.mp3");
     combatSound.play();
 }
@@ -707,6 +720,11 @@ async function combatV2(hero, monstre) {
         const lettreAleatoire = toucheAleatoire(alphabet);
         //? Ajout ici
         fightInstr.textContent = `${lettreAleatoire}`;
+        timerFightProgress.style.animation = '';
+        timerFight.offsetHeight;
+        timerFightProgress.style.animation = 'progressAnimation ease-out 1s';
+        timerFight.style.display = 'none';
+        timerFight.style.display = 'block';
         const result = await attendreToucheAvecTimeout(lettreAleatoire, 1000);
         attaqueCombat(result, hero, monstre);
         mettreAJoursInventaire();
@@ -769,7 +787,7 @@ function checkIfObjectAround(className, callback) {
         if (element?.hasChildNodes()) {
             const img = element.firstChild;
             if (img.className === className) {
-                callback(Number(img.id[1]));
+                callback(Number(img.id.slice(1)));
                 return true;
             }
         }
@@ -805,4 +823,7 @@ function mettreAJoursInventaire() {
 }
 generateMap();
 placerJoueur();
-window.addEventListener('keydown', whichKey);
+skipIntroBtn.addEventListener('click', function () {
+    window.addEventListener('keydown', whichKey);
+    introDiv.style.display = 'none';
+});
