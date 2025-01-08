@@ -471,6 +471,7 @@ const introDiv: HTMLDivElement = document.querySelector('.intro') as HTMLDivElem
 const skipIntroBtn: HTMLButtonElement = document.getElementById('skipIntroBtn') as HTMLButtonElement;
 
 const timerFight: HTMLDivElement = document.querySelector('.timerFight') as HTMLDivElement;
+const timerFightProgress: HTMLDivElement = timerFight.firstElementChild as HTMLDivElement;
 
 
 // Fonctions du jeu
@@ -794,6 +795,8 @@ async function checkIfDead(hero: Human, monstre: Monstre): Promise<void>{
         const roarSound = new Audio("../sounds/monsterRoar.mp3");
         roarSound.play(); 
         crossMonster.style.display = 'block';
+        timerFight.style.display = 'none';
+        fightInstr.textContent = 'Victoire';
         await delay(2000);
         resetDOM(hero, monstre);
     }
@@ -801,7 +804,8 @@ async function checkIfDead(hero: Human, monstre: Monstre): Promise<void>{
         const looseSound = new Audio("../sounds/loose.mp3");
         looseSound.play();
         crossHero.style.display = 'block';
-        indications.textContent = "Vous êtes mort. Le combat est terminé.";
+        fightInstr.textContent = 'Perdu';
+        timerFight.style.display = 'none';
     }
 }
 
@@ -859,6 +863,13 @@ async function combatV2(hero: Human, monstre: Monstre): Promise<void> {
 
         //? Ajout ici
         fightInstr.textContent = `${lettreAleatoire}`;
+
+        timerFightProgress.style.animation = '';
+        timerFight.offsetHeight;
+        timerFightProgress.style.animation = 'progressAnimation ease-out 1s';
+
+        timerFight.style.display = 'none';
+        timerFight.style.display = 'block'; 
 
         const result = await attendreToucheAvecTimeout(lettreAleatoire, 1000);
 

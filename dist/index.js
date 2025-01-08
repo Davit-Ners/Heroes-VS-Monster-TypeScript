@@ -360,6 +360,7 @@ const crossMonster = document.getElementById('crossMonster');
 const introDiv = document.querySelector('.intro');
 const skipIntroBtn = document.getElementById('skipIntroBtn');
 const timerFight = document.querySelector('.timerFight');
+const timerFightProgress = timerFight.firstElementChild;
 // Fonctions du jeu
 // Ceci est la fonction pour generer la carte du jeu en tableau de string
 const map = [
@@ -655,6 +656,8 @@ async function checkIfDead(hero, monstre) {
         const roarSound = new Audio("../sounds/monsterRoar.mp3");
         roarSound.play();
         crossMonster.style.display = 'block';
+        timerFight.style.display = 'none';
+        fightInstr.textContent = 'Victoire';
         await delay(2000);
         resetDOM(hero, monstre);
     }
@@ -662,7 +665,8 @@ async function checkIfDead(hero, monstre) {
         const looseSound = new Audio("../sounds/loose.mp3");
         looseSound.play();
         crossHero.style.display = 'block';
-        indications.textContent = "Vous êtes mort. Le combat est terminé.";
+        fightInstr.textContent = 'Perdu';
+        timerFight.style.display = 'none';
     }
 }
 // Fonction pour gerer l'attaque du joueur ou du monstre dependant de si le joueur reussi le QTE
@@ -712,6 +716,11 @@ async function combatV2(hero, monstre) {
         const lettreAleatoire = toucheAleatoire(alphabet);
         //? Ajout ici
         fightInstr.textContent = `${lettreAleatoire}`;
+        timerFightProgress.style.animation = '';
+        timerFight.offsetHeight;
+        timerFightProgress.style.animation = 'progressAnimation ease-out 1s';
+        timerFight.style.display = 'none';
+        timerFight.style.display = 'block';
         const result = await attendreToucheAvecTimeout(lettreAleatoire, 1000);
         attaqueCombat(result, hero, monstre);
         mettreAJoursInventaire();
