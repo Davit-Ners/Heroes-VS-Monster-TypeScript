@@ -709,6 +709,7 @@ function resetDOM(hero: Human, monstre: Monstre) {
     window.addEventListener('keydown', whichKey);
     mettreAJoursInventaire();
     progressMonster.style.setProperty('--progressMonster', `100%`);
+    progressHero.style.setProperty('--progressHero', `100%`);
 }
 
 //! Ancienne fonction de combat, basé sur du tour par tour sans interactivité avec le joueur
