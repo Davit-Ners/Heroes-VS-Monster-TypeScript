@@ -693,6 +693,7 @@ function setupCombat(monstre) {
     affichePvMonster.textContent = `PV du monstre : ${monstre.pv} PV`;
     indications.textContent = "Le combat entre vous et le monstre commence !";
     console.log("Le combat entre vous et le monstre commence !");
+    fightInstr.textContent = 'READY?';
     //? Ajout ici
     combatZone.style.display = 'block';
     heroZone.prepend(kratos.img);
