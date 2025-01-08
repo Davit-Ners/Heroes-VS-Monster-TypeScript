@@ -357,6 +357,9 @@ const combatZone = document.querySelector('.combat-zone');
 const fightInstr = document.querySelector('#fightInstr');
 const crossHero = document.getElementById('crossHero');
 const crossMonster = document.getElementById('crossMonster');
+const introDiv = document.querySelector('.intro');
+const skipIntroBtn = document.getElementById('skipIntroBtn');
+const timerFight = document.querySelector('.timerFight');
 // Fonctions du jeu
 // Ceci est la fonction pour generer la carte du jeu en tableau de string
 const map = [
@@ -807,4 +810,7 @@ function mettreAJoursInventaire() {
 }
 generateMap();
 placerJoueur();
-window.addEventListener('keydown', whichKey);
+skipIntroBtn.addEventListener('click', function () {
+    window.addEventListener('keydown', whichKey);
+    introDiv.style.display = 'none';
+});

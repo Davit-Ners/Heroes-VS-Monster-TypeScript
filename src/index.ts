@@ -467,6 +467,11 @@ const fightInstr: HTMLParagraphElement = document.querySelector('#fightInstr') a
 const crossHero: HTMLImageElement = document.getElementById('crossHero') as HTMLImageElement;
 const crossMonster: HTMLImageElement = document.getElementById('crossMonster') as HTMLImageElement;
 
+const introDiv: HTMLDivElement = document.querySelector('.intro') as HTMLDivElement;
+const skipIntroBtn: HTMLButtonElement = document.getElementById('skipIntroBtn') as HTMLButtonElement;
+
+const timerFight: HTMLDivElement = document.querySelector('.timerFight') as HTMLDivElement;
+
 
 // Fonctions du jeu
 
@@ -972,4 +977,7 @@ function mettreAJoursInventaire() {
 generateMap();
 placerJoueur();
 
-window.addEventListener('keydown', whichKey);
+skipIntroBtn.addEventListener('click', function() {
+    window.addEventListener('keydown', whichKey);
+    introDiv.style.display = 'none';
+})

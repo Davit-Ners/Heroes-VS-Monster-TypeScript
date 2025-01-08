@@ -127,6 +127,37 @@ main {
     position: relative;
 }
 
+.intro {
+    width: 560px;
+    height: 560px;
+    background-color: #4e4b4b;
+    border: 2px solid black;
+    position: absolute;
+    color: #fff;
+    
+    h2 {
+        text-align: center;
+        margin-bottom: 10px;
+        font-style: oblique;
+    }
+
+    p {
+        margin-left: 20px;
+        margin-right: 10px;
+        font-size: 15.5px;
+        font-style: italic;
+    }
+
+    button {
+        margin-left: 400px;
+        background-color: brown;
+        padding: 5px;
+        border-radius: 15px;
+        font-style: oblique;
+        font-weight: bold;
+    }
+}
+
 .modale {
     width: 300px;
     height: 300px;
@@ -286,16 +317,6 @@ initial-value: 50%;
 inherits: true;
 }
 
-@keyframes shine {
-0% { background-position: 0 0; }
-100% { background-position: 0 50px; }
-}
-
-@keyframes end {
-0%, 100% { box-shadow: 0 0 10px 0px orange; }
-50% { box-shadow: 0 0 15px 5px orange; }
-}
-
 .deathCross {
     position: absolute;
 }
@@ -307,3 +328,33 @@ inherits: true;
 #crossMonster {
     display: none;
 }
+
+.timerFight {
+    --timerFight: 100%;
+    
+    width: 100px;
+    height: 50px;
+    border: 1px solid #fff;
+    padding: 8px 6px;
+    box-shadow: 0 0 10px #aaa;
+    }
+    
+    .timerFight .bar {
+    width: var(--timerFight);
+    height: 100%;
+    background: linear-gradient(rgb(19, 190, 70), rgb(26, 168, 90), rgb(9, 63, 4));
+    background-repeat: repeat;
+    box-shadow: 0 0 10px 0px orange;
+    transition: width 1s ease;
+    }
+    
+    @property --timerFight {
+    syntax: "<length>";
+    initial-value: 50%;
+    inherits: true;
+    }
+
+@keyframes progressAnimation {
+    0% { width: 100%; }
+    100% { width: 0%; }
+    }
