@@ -593,10 +593,6 @@ function resetDOM(hero, monstre) {
     mettreAJoursInventaire();
     progressMonster.style.setProperty('--progressMonster', `100%`);
     progressHero.style.setProperty('--progressHero', `100%`);
-<<<<<<< HEAD
-=======
-    fightInstr.textContent = '';
->>>>>>> f7b8dc309f1a74b45ab0a56396621400895a70d1
 }
 //! Ancienne fonction de combat, basé sur du tour par tour sans interactivité avec le joueur
 // async function combat(hero: Human, monstre: Monstre): Promise<void> {
