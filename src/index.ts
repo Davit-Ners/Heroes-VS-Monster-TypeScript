@@ -473,6 +473,10 @@ const skipIntroBtn: HTMLButtonElement = document.getElementById('skipIntroBtn') 
 const timerFight: HTMLDivElement = document.querySelector('.timerFight') as HTMLDivElement;
 const timerFightProgress: HTMLDivElement = timerFight.firstElementChild as HTMLDivElement;
 
+const closeCraft: HTMLDivElement = document.getElementById('closeCraft') as HTMLDivElement;
+const buyAxe: HTMLButtonElement = document.getElementById('buyAxe') as HTMLButtonElement;
+const modaleCraft: HTMLDivElement = document.querySelector('.modale') as HTMLDivElement;
+
 
 // Fonctions du jeu
 
@@ -636,10 +640,14 @@ function checkIfSomethingAround(): void {
     }
 
     else if (checkIfCraftTable()) {
-        indications.textContent = "3 or pour créer une hache, cliquez sur la table de craft pour l'acheter";
-        console.log("3 or pour créer une hache, cliquez sur la table de craft pour l'acheter");
+        indications.textContent = "Cliquez sur la table de craft pour l'ouvrir";
+        console.log("Cliquez sur la table de craft pour l'ouvrir");
         const craftActuel = tabCraft[idCraftActuel];
-        craftActuel.img.addEventListener('click', craftGun);
+        craftActuel.img.addEventListener('click', function() {
+            modaleCraft.style.display = 'block';
+            window.removeEventListener('keydown', whichKey);
+            buyAxe.addEventListener('click', craftGun);
+        });
     }
 }
 
@@ -992,4 +1000,9 @@ placerJoueur();
 skipIntroBtn.addEventListener('click', function() {
     window.addEventListener('keydown', whichKey);
     introDiv.style.display = 'none';
+})
+
+closeCraft.addEventListener('click', function() {
+    modaleCraft.style.display = 'none';
+    window.addEventListener('keydown', whichKey);
 })

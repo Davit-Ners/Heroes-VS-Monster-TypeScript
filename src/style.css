@@ -166,6 +166,7 @@ main {
     position: absolute;
     top: 100px;
     left: 700px;
+    display: none;
 }
 
 .titreMod {
@@ -174,6 +175,15 @@ main {
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+#closeCraft {
+    transition: ease-in-out 0.2s;
+    &:hover {
+        cursor: pointer;
+        background-color: #2c2b2b;
+        color: azure;
+    }
 }
 
 .inventaireModal {

@@ -361,6 +361,9 @@ const introDiv = document.querySelector('.intro');
 const skipIntroBtn = document.getElementById('skipIntroBtn');
 const timerFight = document.querySelector('.timerFight');
 const timerFightProgress = timerFight.firstElementChild;
+const closeCraft = document.getElementById('closeCraft');
+const buyAxe = document.getElementById('buyAxe');
+const modaleCraft = document.querySelector('.modale');
 // Fonctions du jeu
 // Ceci est la fonction pour generer la carte du jeu en tableau de string
 const map = [
@@ -511,10 +514,14 @@ function checkIfSomethingAround() {
         doorActuel.img.addEventListener('click', openDoor);
     }
     else if (checkIfCraftTable()) {
-        indications.textContent = "3 or pour créer une hache, cliquez sur la table de craft pour l'acheter";
-        console.log("3 or pour créer une hache, cliquez sur la table de craft pour l'acheter");
+        indications.textContent = "Cliquez sur la table de craft pour l'ouvrir";
+        console.log("Cliquez sur la table de craft pour l'ouvrir");
         const craftActuel = tabCraft[idCraftActuel];
-        craftActuel.img.addEventListener('click', craftGun);
+        craftActuel.img.addEventListener('click', function () {
+            modaleCraft.style.display = 'block';
+            window.removeEventListener('keydown', whichKey);
+            buyAxe.addEventListener('click', craftGun);
+        });
     }
 }
 // Fonction pour gerer le deplacement du joueur
@@ -823,4 +830,8 @@ placerJoueur();
 skipIntroBtn.addEventListener('click', function () {
     window.addEventListener('keydown', whichKey);
     introDiv.style.display = 'none';
+});
+closeCraft.addEventListener('click', function () {
+    modaleCraft.style.display = 'none';
+    window.addEventListener('keydown', whichKey);
 });
