@@ -730,76 +730,7 @@ function resetDOM(hero: Human, monstre: Monstre) {
 >>>>>>> f7b8dc309f1a74b45ab0a56396621400895a70d1
 }
 
-//! Ancienne fonction de combat, basé sur du tour par tour sans interactivité avec le joueur
-// async function combat(hero: Human, monstre: Monstre): Promise<void> {
-//     pvMonster.style.visibility = 'visible';
-//     affichePvMonster.textContent = `PV du monstre : ${monstre.pv} PV`;
-//     indications.textContent = "Le combat entre vous et le monstre commence !";
-//     console.log("Le combat entre vous et le monstre commence !");
-//     const combatSound = new Audio("../sounds/fight.mp3");
-//     combatSound.play();
-//     await delay(1000);
-//     const music = new Audio("../sounds/musicBattle.mp3");
-//     music.loop = true;
-//     music.play();
-    
-//     while (hero.isAlive && monstre.isAlive) {
-//         const pvMonstre = monstre.pv;
-//         hero.attaque(monstre);
-//         const punchSound = new Audio("../sounds/punch.mp3");
-//         punchSound.play();
-
-//         if (!monstre.isAlive) {
-//             indications.textContent = "Après cette attaque, vous avez vaincu le monstre !";
-//             console.log("Après cette attaque, vous avez vaincu le monstre !");
-//             kratos.loot(monstre);
-//             const roarSound = new Audio("../sounds/monsterRoar.mp3");
-//             roarSound.play(); 
-//             monstre.img.remove();
-//             hero.repos();
-//             window.addEventListener('keydown', whichKey);
-//             mettreAJoursInventaire()
-//             setTimeout(function() {
-//                 indications.textContent = "";
-//             }, 1000);
-//             break;
-//         } else {
-//             indications.textContent = `Vous avez infligé ${pvMonstre - monstre.pv} de dégat au monstre, il ne lui reste plus que ${monstre.pv} pv !`;
-//             console.log(`Vous avez infligé ${pvMonstre - monstre.pv} de dégat au monstre, il ne lui reste plus que ${monstre.pv} pv !`);
-//             affichePvMonster.textContent = `PV du monstre : ${monstre.pv} PV`;
-//         }
-
-//         await delay(1000);
-
-//         if (monstre.isAlive) {
-//             const pvHero = hero.pv;
-//             monstre.attaque(hero);
-//             mettreAJoursInventaire();
-//             const swordSound = new Audio("../sounds/sword.mp3");
-//             swordSound.play();
-//             if (!hero.isAlive) {
-//                 indications.textContent = "Après cette attaque du monstre, vous êtes mort !";
-//                 console.log("Après cette attaque du monstre, vous êtes mort !");
-//                 const looseSound = new Audio("../sounds/loose.mp3");
-//                 looseSound.play();
-//                 gameOver = true;
-//                 break;
-//             } else {
-//                 indications.textContent = `Le monstre vous a infligé ${pvHero - hero.pv} de dégat, il ne vous reste plus que ${hero.pv} pv !`;
-//                 console.log(`Le monstre vous a infligé ${pvHero - hero.pv} de dégat, il ne vous reste plus que ${hero.pv} pv !`);
-//             }
-//         }
-
-//         await delay(1000);
-//     }
-
-//     music.pause();
-//     music.currentTime = 0; // Réinitialiser à zéro
-//     pvMonster.style.visibility = 'hidden';
-// }
-
 // Fonction pour checker si le hero ou le monstre est mort entre les attaques du combat
-
 async function checkIfDead(hero: Human, monstre: Monstre): Promise<void>{
     if (!monstre.isAlive) {
         kratos.loot(monstre);
