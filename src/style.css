@@ -393,3 +393,9 @@ inherits: true;
     0% { width: 100%; }
     100% { width: 0%; }
     }
+
+#skipIntroBtn {
+    &:hover {
+        cursor: pointer;
+    }
+}
